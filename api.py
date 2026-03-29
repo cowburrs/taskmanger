@@ -1,6 +1,7 @@
 import calendar
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Callable
+
 import holidays
 
 
@@ -11,8 +12,8 @@ class api:
     def dayofyear(self):
         return self.date.timetuple().tm_yday
 
-    def hash(self):
-        return self.date.strftime("%Y%m%d%H")
+    def hash(self, timed = timedelta(0)):
+        return (self.date + timed).strftime("%Y%m%d%H%M")
 
     def hour(self):
         return self.date.hour
@@ -50,5 +51,6 @@ class api:
     def daystoendofyear(self):
         return (datetime(self.date.year, 12, 31) - self.date).days
 
-    def ispublicholiday(self):
-        return self.date.date() in holidays.Australia(state="ACT", years=self.date.year)
+    # holidays.Australia(state="ACT", years=self.date.year)
+    def ispublicholiday(self, holidaylist):
+        return self.date.date() in holidaylist
