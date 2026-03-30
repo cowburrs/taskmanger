@@ -5,6 +5,7 @@ from typing import Callable
 import holidays
 
 # TODO: This should be a helper object not an object i also instantiate, methinks 
+# TODO: Actually its fine, but real i think it should be called daydata instead
 class api:
     def __init__(self, date: datetime) -> None:
         self.date = date
