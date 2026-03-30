@@ -18,12 +18,12 @@ from controller import *
 buildTasks()
 todo, finished, upcoming = [], [], []
 todo = list()
-for i in getPending(api(datetime.now()).hash()):
+for i in getPending(datetime.now()):
     todo.append((i[0], i[1]))
 print(todo)
 for i in getAllDone():
     finished.append((i[0], i[1]))
-for i in getUpcoming(api(datetime.now()).hash()):
+for i in getUpcoming(datetime.now()):
     upcoming.append((i[0], i[1]))
 
 COLUMNS = [

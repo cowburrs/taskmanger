@@ -1,19 +1,19 @@
-# TODO: CREATE GET OVERDUE FUNCTION, AND ADD PARAMETER TO TASKS TO MAKE A MAX NUMBER OF REPEATS FOR A TASK. ALSO ADD DEFAULTS SO YOU DON'T HAVE TO IMPLICITLY SPECIFY ALL
 import sqlite3
 from datetime import datetime
 
-from api import api
-from tasks import T, tasks
+from dayfuncs import *
+from tasks import Task, tasks
 
 conn = sqlite3.connect("tasks.db")
 cursor = conn.cursor()
 
+# TODO: make table bigger and stuff. todo later. like add stuff like fudgefactor and priority whatveer
 cursor.execute(
     """
     CREATE TABLE IF NOT EXISTS tasks (
         name TEXT,
         datetime INTEGER,
-        carryover INTEGER DEFAULT 0,
+        duedate INTEGER DEFAULT 0,
         done INTEGER DEFAULT 0,
         id INTEGER PRIMARY KEY,
         UNIQUE(name, datetime)
@@ -26,7 +26,7 @@ cursor.execute(
     CREATE TABLE IF NOT EXISTS completedTasks (
         name TEXT,
         datetime INTEGER,
-        carryover INTEGER DEFAULT 0,
+        duedate INTEGER DEFAULT 0,
         done INTEGER DEFAULT 1,
         id INTEGER PRIMARY KEY,
         UNIQUE(name, datetime)
@@ -36,10 +36,10 @@ cursor.execute(
 conn.commit()
 
 
-def insertTask(name, datetime, carryover):
+def insertTask(name, datetime, duedate):
     cursor.execute(
-        "INSERT OR IGNORE INTO tasks (name, datetime, carryover) VALUES (?, ?, ?)",
-        (name, datetime, carryover),
+        "INSERT OR IGNORE INTO tasks (name, datetime, duedate) VALUES (?, ?, ?)",
+        (name, datetime, duedate),
     )
     conn.commit()
 
@@ -54,7 +54,7 @@ def markUndone(name, datetime):
 
 def markDone(name, datetime):
     cursor.execute(
-        "INSERT OR IGNORE INTO completedTasks (name, datetime, carryover) SELECT name, datetime, carryover FROM tasks WHERE name = ? AND datetime = ?",
+        "INSERT OR IGNORE INTO completedTasks (name, datetime, duedate) SELECT name, datetime, duedate FROM tasks WHERE name = ? AND datetime = ?",
         (name, datetime),
     )
     cursor.execute(
@@ -79,9 +79,9 @@ def markDoneOrUndone(name, datetime):
 def getAllUndone():
     return cursor.execute(
         """
-        SELECT t.name, t.datetime, t.carryover, t.id
+        SELECT t.name, t.datetime, t.duedate, t.id
         FROM tasks t
-        LEFT JOIN completedTasks c ON t.name = c.name AND t.datetime = c.datetime AND t.carryover = c.carryover
+        LEFT JOIN completedTasks c ON t.name = c.name AND t.datetime = c.datetime AND t.duedate = c.duedate
         WHERE COALESCE(c.done, 0) = 0
     """
     ).fetchall()
@@ -90,10 +90,10 @@ def getAllUndone():
 def getPending(datetime):
     return cursor.execute(
         """
-        SELECT t.name, t.datetime, t.carryover, t.id
+        SELECT t.name, t.datetime, t.duedate, t.id
         FROM tasks t
-        LEFT JOIN completedTasks c ON t.name = c.name AND t.datetime = c.datetime AND t.carryover = c.carryover
-        WHERE COALESCE(c.done, 0) = 0 AND t.datetime <= ? AND t.carryover >= ?
+        LEFT JOIN completedTasks c ON t.name = c.name AND t.datetime = c.datetime
+        WHERE COALESCE(c.done, 0) = 0 AND t.datetime <= ? AND (t.duedate >= ? OR t.duedate <= t.datetime)
     """,
         (datetime, datetime),
     ).fetchall()
@@ -102,9 +102,9 @@ def getPending(datetime):
 def getUpcoming(datetime):
     return cursor.execute(
         """
-        SELECT t.name, t.datetime, t.carryover, t.id
+        SELECT t.name, t.datetime, t.duedate, t.id
         FROM tasks t
-        LEFT JOIN completedTasks c ON t.name = c.name AND t.datetime = c.datetime AND t.carryover = c.carryover
+        LEFT JOIN completedTasks c ON t.name = c.name AND t.datetime = c.datetime
         WHERE COALESCE(c.done, 0) = 0 AND t.datetime >= ?
     """,
         (datetime,),
@@ -114,7 +114,7 @@ def getUpcoming(datetime):
 def getAll():
     return cursor.execute(
         """
-        SELECT t.name, t.datetime, t.carryover, t.id
+        SELECT t.name, t.datetime, t.duedate, t.id
         FROM tasks t
     """
     ).fetchall()
@@ -123,7 +123,7 @@ def getAll():
 def getAllDone():
     return cursor.execute(
         """
-        SELECT c.name, c.datetime, c.carryover, c.id
+        SELECT c.name, c.datetime, c.duedate, c.id
         FROM completedTasks c
     """
     ).fetchall()
@@ -136,15 +136,18 @@ def buildTasks():
         evaluate(task)
 
 
-def evaluate(task):
-    current = task[T.START]
-    end = task[T.END]
-    while end >= current:
-        currentapi = api(current)
-        if all(fn(currentapi, arg) for fn, arg in task[T.CONDITIONS]):
+def evaluate(task: Task):
+    check = task.checkstart()
+    checkend = task.checkend(check)
+    while checkend >= check:
+        if all(fn(check) for fn in task.conditions):
             insertTask(
-                task[T.NAME](currentapi),
-                currentapi.hash(),
-                currentapi.hash(task[T.CARRYOVER]),
+                task.name(check),
+                datetoint(check),
+                datetoint(task.duetime(check)),
             )
-        current += task[T.TIMED]
+        check += task.checkstep(check)
+
+
+buildTasks()
+print(getAll())
