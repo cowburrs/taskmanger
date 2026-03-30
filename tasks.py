@@ -7,10 +7,13 @@ from api import api
 class T(Enum):
     NAME = "name"
     CONDITIONS = "conditions"
-    CARRYOVER = "carryover"
+    CARRYOVER = "due date"
     START = "start"
     END = "end"
     TIMED = "hourly"
+    IMPORTANCE = "hourly"
+    VERSION = "version"
+    FUDGENUMBER = "something"
 
 
 def isDayWeek(api: api, dayslist) -> bool:
@@ -18,7 +21,7 @@ def isDayWeek(api: api, dayslist) -> bool:
 
 
 tasks = [
-    {
+    { # These could all be functions icl. i think i'd like that.
         T.NAME: (lambda api: f"{api.week()} Maths"),
         T.CONDITIONS: [(isDayWeek, (1, ))],
         T.CARRYOVER: timedelta(100),
