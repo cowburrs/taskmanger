@@ -148,6 +148,3 @@ def evaluate(task: Task):
             )
         check += task.checkstep(check)
 
-
-buildTasks()
-print(getAll())
