@@ -1,150 +1,128 @@
+import json
+import os
 import sqlite3
-from datetime import datetime
+import subprocess
 
-from dayfuncs import *
-from tasks import Task, tasks
+from funcs import *
+from model import Task, tasks
 
-conn = sqlite3.connect("tasks.db")
-cursor = conn.cursor()
+os.chdir(os.path.dirname(__file__))
 
-# TODO: make table bigger and stuff. todo later. like add stuff like fudgefactor and priority whatveer
-cursor.execute(
-    """
-    CREATE TABLE IF NOT EXISTS tasks (
-        name TEXT,
-        datetime INTEGER,
-        duedate INTEGER DEFAULT 0,
-        done INTEGER DEFAULT 0,
-        id INTEGER PRIMARY KEY,
-        UNIQUE(name, datetime)
+
+def insertTask(task: Task, date: datetime, repeats):
+    try:
+        with open("tasks.json") as f:
+            file = json.load(f)
+    except FileNotFoundError:
+        file = []
+
+    file.append(
+        {
+            "name": task.name(date, repeats),
+            "date": datetoint(date),
+            "desc": task.description(date),
+            "due": datetoint(task.duetime(date)),
+            "prio": task.importance(date),
+            "ver": task.version(date),
+            # "nth time" TODO: record how many times its been seen before
+        }
     )
-"""
-)
-
-cursor.execute(
-    """
-    CREATE TABLE IF NOT EXISTS completedTasks (
-        name TEXT,
-        datetime INTEGER,
-        duedate INTEGER DEFAULT 0,
-        done INTEGER DEFAULT 1,
-        id INTEGER PRIMARY KEY,
-        UNIQUE(name, datetime)
+    print(
+        {
+            "name": task.name(date, repeats),
+            # "due": timedeltatostr(task.duetime(date) - datetime.now()),
+            "duedate": task.duetime(date).strftime("%B %d, %Y %H:%M:%S"),
+        }
     )
-"""
-)
-conn.commit()
+
+    with open("tasks.json", "w") as f:
+        json.dump(file, f, indent=2)
 
 
-def insertTask(name, datetime, duedate):
-    cursor.execute(
-        "INSERT OR IGNORE INTO tasks (name, datetime, duedate) VALUES (?, ?, ?)",
-        (name, datetime, duedate),
-    )
-    conn.commit()
-
-
-def markUndone(name, datetime):
-    cursor.execute(
-        "DELETE FROM completedTasks WHERE name = ? AND datetime = ?",
-        (name, datetime),
-    )
-    conn.commit()
-
-
-def markDone(name, datetime):
-    cursor.execute(
-        "INSERT OR IGNORE INTO completedTasks (name, datetime, duedate) SELECT name, datetime, duedate FROM tasks WHERE name = ? AND datetime = ?",
-        (name, datetime),
-    )
-    cursor.execute(
-        "UPDATE completedTasks SET done = 1 WHERE name = ? AND datetime = ?",
-        (name, datetime),
-    )
-    conn.commit()
-
-
-def markDoneOrUndone(name, datetime):
-    result = cursor.execute(
-        "SELECT done FROM completedTasks WHERE name = ? AND datetime = ?",
-        (name, datetime),
-    ).fetchone()
-
-    if result and result[0] == 1:
-        markUndone(name, datetime)
-    else:
-        markDone(name, datetime)
+def deleteTasks():
+    with open("tasks.json", "w") as f:
+        json.dump([], f)
+    with open("todo.json", "w") as f:
+        json.dump([], f)
 
 
 def getAllUndone():
-    return cursor.execute(
-        """
-        SELECT t.name, t.datetime, t.duedate, t.id
-        FROM tasks t
-        LEFT JOIN completedTasks c ON t.name = c.name AND t.datetime = c.datetime AND t.duedate = c.duedate
-        WHERE COALESCE(c.done, 0) = 0
-    """
-    ).fetchall()
+    pass
 
 
-def getPending(datetime):
-    return cursor.execute(
-        """
-        SELECT t.name, t.datetime, t.duedate, t.id
-        FROM tasks t
-        LEFT JOIN completedTasks c ON t.name = c.name AND t.datetime = c.datetime
-        WHERE COALESCE(c.done, 0) = 0 AND t.datetime <= ? AND (t.duedate >= ? OR t.duedate <= t.datetime)
-    """,
-        (datetime, datetime),
-    ).fetchall()
+def getToDo(date: datetime):
+    try:
+        with open("tasks.json") as f:
+            tasks = json.load(f)
+    except FileNotFoundError:
+        tasks = []
+    try:
+        with open("todo.json") as f:
+            todo = json.load(f)
+    except FileNotFoundError:
+        todo = []
+    try:
+        with open("done.json") as f:
+            done = json.load(f)
+            # done.remove()
+    except FileNotFoundError:
+        done = []
+        # TODO: i maybe want to change d[] to d.get[] for like safety, but too lazy
+    donetasks = {(d["name"], d["date"]) for d in done}
+    for i in tasks:
+        if inttodate(i["date"]) <= date and ((i["name"], i["date"]) not in donetasks):
+            taskdict = {
+                "name": i["name"],
+                "due": ifhelper(
+                    (i["due"] != i["date"]),
+                    timedeltatostr(inttodate(i["due"]) - date),
+                    "No due date",
+                ),
+            }
+            if i["desc"] != "":
+                taskdict["desc"] = i["desc"]
+            taskdict["date"] = i["date"]
+            # print(f"{taskdict},")
+            todo.append(taskdict)
+    todo.append({"name": "End of Todo", "date": "0"})
+    with open("todo.json", "w") as f:
+        json.dump(todo, f, indent=2)
 
 
 def getUpcoming(datetime):
-    return cursor.execute(
-        """
-        SELECT t.name, t.datetime, t.duedate, t.id
-        FROM tasks t
-        LEFT JOIN completedTasks c ON t.name = c.name AND t.datetime = c.datetime
-        WHERE COALESCE(c.done, 0) = 0 AND t.datetime >= ?
-    """,
-        (datetime,),
-    ).fetchall()
+    pass
 
 
 def getAll():
-    return cursor.execute(
-        """
-        SELECT t.name, t.datetime, t.duedate, t.id
-        FROM tasks t
-    """
-    ).fetchall()
+    pass
 
 
 def getAllDone():
-    return cursor.execute(
-        """
-        SELECT c.name, c.datetime, c.duedate, c.id
-        FROM completedTasks c
-    """
-    ).fetchall()
+    pass
 
 
 def buildTasks():
-    cursor.execute("DELETE FROM tasks")
-    conn.commit()
+    deleteTasks()
     for task in tasks:
         evaluate(task)
+    getToDo(datetime.now())
+    subprocess.run(["bash", "-c", "prettier --write *.json >/dev/null"])
 
 
 def evaluate(task: Task):
     check = task.checkstart()
     checkend = task.checkend(check)
-    while checkend >= check:
+    checkrepeats = task.checkrepeats(check, -1)
+    repeats = 0
+    if task.conditions == []:
+        insertTask(task, check, repeats)
+        return
+    while checkend >= check and checkrepeats != 0:
         if all(fn(check) for fn in task.conditions):
-            insertTask(
-                task.name(check),
-                datetoint(check),
-                datetoint(task.duetime(check)),
-            )
+            insertTask(task, check, repeats)
+            checkrepeats = task.checkrepeats(check, checkrepeats)
+            repeats += 1
         check += task.checkstep(check)
 
+
+buildTasks()
