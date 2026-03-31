@@ -91,6 +91,25 @@ def oneTimeTask(Name: str, Start: datetime, Due: datetime):
     )
 
 
+def lectureTask(
+    Subject: str, Letter: str, Week, WeekDay: int, Start: datetime, Repeats: int
+):
+    return Task(
+        name=lambda date, n: f"{Subject.capitalize()} Week {n + Week} Lec{Letter.upper()}",
+        conditions=[isDayOfWeek(WeekDay), isNotTeachingBreak()],
+        duetime=dueTime(timedelta(5)),
+        checkstart=justValue(Start),
+        checkrepeats=justRepeats(Repeats),
+    )
+
+
+def lectureTasks(Subject: str, Week, Repeats: int, Sessions: list[list]):
+    return tuple(
+        lectureTask(Subject, letter, Week, WeekDay, Start, Repeats)
+        for letter, (WeekDay, Start) in zip("ABCDEFG", Sessions)
+    )
+
+
 @dataclass
 class Task:
     name: Callable[[datetime, int], str]
@@ -118,11 +137,6 @@ class Task:
 # TODO: Textbook Chaptersssssssss, like lambda calculus
 # TODO: I should make constructors for tasks, like curyring so that i dont have to specify everytghin, for example lecture tasks are like 3 days due date and stuff(or no due date if i decide to change in the future)
 tasks = [
-    Task(
-        name=justName("Random I guess"),
-        conditions=[isDayWeek([7, 7])],
-        checkstart=justValue(datetime(2026, 3, 2)),
-    ),
     Task(
         name=justName("Understand Nullspaces"),
     ),
@@ -170,6 +184,7 @@ tasks = [
         checkrepeats=justRepeats(6),
     ),
     # TODO: I could make a schoolweek function, so that the names can be done better, an n function curry is what i mean to remove the date cause its bloat at the end of the day
+    # TODO: wait i just remember what i was thinking, like schoolweek function for the name, like week - number of schoolweeks had, not currying
     Task(
         name=lambda date, n: f"Comp Week {n+6} LecB",
         conditions=[isDayWeek([1, 1]), isNotTeachingBreak()],
@@ -199,29 +214,29 @@ tasks = [
         checkrepeats=justRepeats(6),
     ),
     Task(
-        name=lambda date, n: f"Math Week {n + 6} Assignment Question/Task",
+        name=lambda date, n: f"Math Week {n + 6} Assignment Q/Task",
         conditions=[isDayOfWeek(0), isNotTeachingBreak()],
         duetime=dueTime(timedelta(3)),
         checkstart=justValue(datetime(2026, 3, 30)),
         checkrepeats=justRepeats(6),
     ),
     oneTimeTask(
-        "Engn Team member contribution 1 (TMC1)",
+        "Engn Team (TMC1)",
         datetime(2026, 3, 30),
         datetime(2026, 4, 19),
     ),
     oneTimeTask(
-        "Engn Milestone 3 - Rover-in-motion",
+        "Engn Milestone 3",
         datetime(2026, 3, 30),
         datetime(2026, 4, 21),
     ),
     oneTimeTask(
-        "Engn Self-assessment Milestone 3",
+        "Engn Self-Assessment Milestone 3",
         datetime(2026, 4, 21),
         datetime(2026, 4, 28),
     ),
     oneTimeTask(
-        "Engn Milestone 4 - Draft documentation and testing plan",
+        "Engn Milestone 4",
         datetime(2026, 3, 30),
         datetime(2026, 5, 12),
     ),
@@ -236,13 +251,22 @@ tasks = [
         datetime(2026, 5, 29),
     ),
     oneTimeTask(
-        "Engn Rover design report",
+        "Engn Rover Design Report",
         datetime(2026, 4, 20),
         datetime(2026, 5, 29),
     ),
     oneTimeTask(
-        "Engn Team member contribution 2 (TMC2)",
+        "Engn Team (TMC2)",
         datetime(2026, 5, 25),
         datetime(2026, 6, 1),
+    ),
+    *lectureTasks(
+        "math",
+        6,
+        6,
+        [
+            [1, datetime(2026, 3, 30, 9)],
+            [2, datetime(2026, 3, 30, 9)],
+        ],
     ),
 ]

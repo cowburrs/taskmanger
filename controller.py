@@ -27,13 +27,13 @@ def insertTask(task: Task, date: datetime, repeats):
             # "nth time" TODO: record how many times its been seen before
         }
     )
-    print(
-        {
-            "name": task.name(date, repeats),
-            # "due": timedeltatostr(task.duetime(date) - datetime.now()),
-            "duedate": task.duetime(date).strftime("%B %d, %Y %H:%M:%S"),
-        }
-    )
+    # print(
+    #     {
+    #         "name": task.name(date, repeats),
+    #         # "due": timedeltatostr(task.duetime(date) - datetime.now()),
+    #         "duedate": task.duetime(date).strftime("%B %d, %Y %H:%M:%S"),
+    #     }
+    # )
 
     with open("tasks.json", "w") as f:
         json.dump(file, f, indent=2)
@@ -82,7 +82,6 @@ def getToDo(date: datetime):
             if i["desc"] != "":
                 taskdict["desc"] = i["desc"]
             taskdict["date"] = i["date"]
-            # print(f"{taskdict},")
             todo.append(taskdict)
     todo.append({"name": "End of Todo", "date": "0"})
     with open("todo.json", "w") as f:
