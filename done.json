@@ -1,7 +1,8 @@
 [
+  { "name": "Comp Week 6 LecA", "due": "3 Days, 2 Hours", "date": 202603301400 },
+  { "name": "Math Week 6 LecA", "due": "3 Days, 22 Hours", "date": 202603310900 },
+  { "name": "Math Week 6 MatLab", "due": "13 Hours, 7 Minutes", "date": 202603300000 },
   { "name": "10 Maths", "due": "-22 Days, 18 Hours", "date": 202603020000 },
   { "name": "11 Maths", "due": "-15 Days, 18 Hours", "date": 202603090000 },
-  { "name": "Math Week 6 MatLab", "due": "13 Hours, 7 Minutes", "date": 202603300000 },
-  { "name": "Math Week 6 LecA", "due": "3 Days, 22 Hours", "date": 202603310900 },
   { "name": "End of Done", "date": 0 }
 ]

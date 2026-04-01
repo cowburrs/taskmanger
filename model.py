@@ -136,6 +136,9 @@ class Task:
 # TODO: I think checkstep could be what i use
 # TODO: Textbook Chaptersssssssss, and lambda calculus things too
 # how do i even do textbook chapters? when they're diffrent like 7.1-7.5 vs 4.1-4.13, i have an idea, a list of ints, each for the size of each chapter, and yeah yeah yeah i got it
+# I could just make a list of chapte rlengths[1, 3, 5], andit will expand it to a total list
+# like 1.1, 2.1, 2.2, 2.3, 3.1, 3.2, 3.3, 3.4, 3.5
+# and just index into it based on how many times repeated, like []
 # TODO: I should make constructors for tasks, like curyring so that i dont have to specify everytghin, for example lecture tasks are like 3 days due date and stuff(or no due date if i decide to change in the future)
 tasks = [
     Task(
@@ -194,6 +197,7 @@ tasks = [
         checkstart=justValue(datetime(2026, 3, 30)),
         checkrepeats=justRepeats(6),
     ),
+    # TODO: Names need to be done better just straight up
     Task(
         name=lambda date, n: f"Math Week {n + 6} Assignment Q/Task",
         conditions=[isDayOfWeek(0), isNotTeachingBreak()],
