@@ -110,6 +110,10 @@ def lectureTasks(Subject: str, Week, Repeats: int, Sessions: list[list]):
     )
 
 
+def singleTasks(str: list[str]):
+    return tuple(justName(s) for s in str)
+
+
 # TODO: I reckon i'd want something like a 'instant delete' check, or like a checkdisappear
 # so that if it passes this timedelta, it wont show up as a task anymore
 @dataclass
@@ -142,10 +146,13 @@ class Task:
 # like 1.1, 2.1, 2.2, 2.3, 3.1, 3.2, 3.3, 3.4, 3.5
 # and just index into it based on how many times repeated, like []
 # TODO: I should make constructors for tasks, like curyring so that i dont have to specify everytghin, for example lecture tasks are like 3 days due date and stuff(or no due date if i decide to change in the future)
+
 tasks = [
+    # TODO: i should make a function, which takes a list of strings, and creates a bunch of tasks with just a name justtname ykwim
     Task(
         name=justName("Understand Nullspaces"),
     ),
+    # *singleTasks(["Understand Nullspaces", "Kill myself", "Just kidding"]),
     Task(
         name=lambda date, n: f"Phys Week {n + 6} Lectures",
         conditions=[isDayWeek([0, 0]), isNotTeachingBreak()],
@@ -258,7 +265,8 @@ tasks = [
     ),
     *lectureTasks(
         "comp",
-        6, 6,
+        6,
+        6,
         [
             [0, datetime(2026, 3, 30, 14)],
             [1, datetime(2026, 3, 30, 15)],
