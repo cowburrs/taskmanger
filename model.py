@@ -152,7 +152,7 @@ tasks = [
     Task(
         name=justName("Understand Nullspaces"),
     ),
-    # *singleTasks(["Understand Nullspaces", "Kill myself", "Just kidding"]),
+    # *singleTasks(["Understand Nullspaces", "Kill myself", "Just kidding"]), # TODO: MAKE THIS SHIT WORK
     Task(
         name=lambda date, n: f"Phys Week {n + 6} Lectures",
         conditions=[isDayWeek([0, 0]), isNotTeachingBreak()],
