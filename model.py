@@ -129,7 +129,7 @@ class Task:
     duetime: Callable[[datetime], datetime] = dueTimeDefault()  # 0 means never due
     importance: Callable[[datetime], int] = just(0)
     version: Callable[[datetime], float] = just(0)
-    checkstart: Callable[[], datetime] = justValue(datetime(2026, 2, 1))
+    checkstart: Callable[[], datetime] = justValue(datetime(2000, 1, 1))
     checkend: Callable[[datetime], datetime] = checkEndDefault()
     checkdelta: Callable[[datetime], timedelta] = just(
         timedelta(0)

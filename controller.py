@@ -1,12 +1,31 @@
 import json
 import os
-import sqlite3
-import subprocess
+from collections import Counter
 
 from funcs import *
 from model import Task, tasks
 
 os.chdir(os.path.dirname(__file__))
+
+
+def taskDictShorten(t, date):
+    taskdict = {
+        "name": t["name"],
+        "due": ifhelper(
+            (t["due"] != t["date"]),
+            timedeltatostr(inttodate(t["due"]) - date),
+            "No due date",
+        ),
+        "assigned": ifhelper(
+            (t["date"] != datetoint(datetime(2000, 1, 1))),
+            timedeltatostr(inttodate(t["date"]) - date),
+            "N/A",
+        ),
+    }
+    if t["desc"] != "":
+        taskdict["desc"] = t["desc"]
+    taskdict["date"] = t["date"]
+    return taskdict
 
 
 def insertTask(task: Task, date: datetime, repeats):
@@ -24,17 +43,9 @@ def insertTask(task: Task, date: datetime, repeats):
             "due": datetoint(task.duetime(date)),
             "prio": task.importance(date),
             "ver": task.version(date),
-            # "nth time" TODO: record how many times its been seen before
+            "num": repeats,  # num repeats
         }
     )
-    # print(
-    #     {
-    #         "name": task.name(date, repeats),
-    #         # "due": timedeltatostr(task.duetime(date) - datetime.now()),
-    #         # "duedate": task.duetime(date).strftime("%B %d, %Y %H:%M:%S"),
-    #         "date": str(date)
-    #     }
-    # )
 
     with open("tasks.json", "w") as f:
         json.dump(file, f, indent=2)
@@ -43,10 +54,10 @@ def insertTask(task: Task, date: datetime, repeats):
 def deleteTasks():
     with open("tasks.json", "w") as f:
         json.dump([], f)
-    with open("todo.json", "w") as f:
-        json.dump([], f)
 
-
+# TODO: i just had the best fucking idea ever, how about instead of parsing into done
+# I make it create another json, donetasks.json, with donetasks but in proper format
+# so i dont have to kill myself again and again
 def getAllUndone():
     pass
 
@@ -60,11 +71,7 @@ def getToDo(date: datetime):
             tasks = json.load(f)
     except FileNotFoundError:
         tasks = []
-    try:
-        with open("todo.json") as f:
-            todo = json.load(f)
-    except FileNotFoundError:
-        todo = []
+    todo = []
     try:
         with open("done.json") as f:
             done = json.load(f)
@@ -75,22 +82,28 @@ def getToDo(date: datetime):
     donetasks = {(d["name"], d["date"]) for d in done}
     for i in tasks:
         if inttodate(i["date"]) <= date and ((i["name"], i["date"]) not in donetasks):
-            taskdict = {
-                "name": i["name"],
-                "due": ifhelper(
-                    (i["due"] != i["date"]),
-                    timedeltatostr(inttodate(i["due"]) - date),
-                    "No due date",
-                ),
-            }
-            if i["desc"] != "":
-                taskdict["desc"] = i["desc"]
-            taskdict["date"] = i["date"]
-            todo.append(taskdict)
-            # TODO: Add when it was assigned, like how long ago it was., like for example a comp thing assigned 1 minute ago would be -1 minute some seconds
+            todo.append(taskDictShorten(i, date))
     todo.append({"name": "End of Todo", "date": "0"})
     with open("todo.json", "w") as f:
         json.dump(todo, f, indent=2)
+
+
+def getAllTodo(date: datetime):  # print all even not done
+    try:
+        with open("tasks.json") as f:
+            tasks = json.load(f)
+    except FileNotFoundError:
+        tasks = []
+    todo = []
+    for i in tasks:
+        if inttodate(i["date"]) <= date:
+            todo.append(taskDictShorten(i, date))
+    todo.append({"name": "End of AllTodo", "date": "0"})
+    with open("jsons/alltodo.json", "w") as f:
+        json.dump(todo, f, indent=2)
+
+
+getAllTodo(datetime.now())
 
 
 def getUpcoming(datetime):
@@ -110,8 +123,6 @@ def buildTasks():
     for task in tasks:
         evaluate(task)
     getToDo(datetime.now())
-    # TODO: Just add this pretier to the todo function in bash
-    subprocess.run(["bash", "-c", "prettier --write *.json >/dev/null"])
 
 
 def evaluate(task: Task):
