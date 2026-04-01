@@ -87,6 +87,7 @@ def getToDo(date: datetime):
                 taskdict["desc"] = i["desc"]
             taskdict["date"] = i["date"]
             todo.append(taskdict)
+            # TODO: Add when it was assigned, like how long ago it was., like for example a comp thing assigned 1 minute ago would be -1 minute some seconds
     todo.append({"name": "End of Todo", "date": "0"})
     with open("todo.json", "w") as f:
         json.dump(todo, f, indent=2)

@@ -146,7 +146,8 @@ class Task:
 # like 1.1, 2.1, 2.2, 2.3, 3.1, 3.2, 3.3, 3.4, 3.5
 # and just index into it based on how many times repeated, like []
 # TODO: I should make constructors for tasks, like curyring so that i dont have to specify everytghin, for example lecture tasks are like 3 days due date and stuff(or no due date if i decide to change in the future)
-
+# TODO: I could incorporate gum cli prettier tool to ask like yes no do i want to gitshit and yes no do i want to go back and change/add more things
+# Or i could make it that when you do exit, it checks if done has been changed, and auto git add commits that. that sounds smart
 tasks = [
     # TODO: i should make a function, which takes a list of strings, and creates a bunch of tasks with just a name justtname ykwim
     Task(
