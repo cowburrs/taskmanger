@@ -1,12 +1,12 @@
 [
   { "name": "Understand Nullspaces", "due": "No due date", "date": 202602010000 },
-  { "name": "Phys Week 6 Lectures", "due": "2 Days, 8 Hours", "date": 202603300000 },
-  { "name": "Phys Week 6 Pre-Reading Quiz", "due": "21 Days, 20 Hours", "date": 202603300000 },
-  { "name": "Phys Week 6 Workshop Quiz", "due": "21 Days, 20 Hours", "date": 202603300000 },
-  { "name": "Engn Team (TMC1)", "due": "17 Days, 8 Hours", "date": 202603300000 },
-  { "name": "Engn Milestone 3", "due": "19 Days, 8 Hours", "date": 202603300000 },
-  { "name": "Engn Milestone 4", "due": "40 Days, 8 Hours", "date": 202603300000 },
-  { "name": "Math Week 6 LecB", "due": "4 Days, 17 Hours", "date": 202604010900 },
-  { "name": "Engn Week 6 LecB", "due": "4 Days, 0 Hours", "date": 202603311600 },
+  { "name": "Phys Week 6 Lectures", "due": "2 Days, 6 Hours", "date": 202603300000 },
+  { "name": "Phys Week 6 Pre-Reading Quiz", "due": "21 Days, 18 Hours", "date": 202603300000 },
+  { "name": "Phys Week 6 Workshop Quiz", "due": "21 Days, 18 Hours", "date": 202603300000 },
+  { "name": "Engn Team (TMC1)", "due": "17 Days, 6 Hours", "date": 202603300000 },
+  { "name": "Engn Milestone 3", "due": "19 Days, 6 Hours", "date": 202603300000 },
+  { "name": "Engn Milestone 4", "due": "40 Days, 6 Hours", "date": 202603300000 },
+  { "name": "Math Week 6 LecB", "due": "4 Days, 15 Hours", "date": 202604010900 },
+  { "name": "Engn Week 6 LecB", "due": "3 Days, 22 Hours", "date": 202603311600 },
   { "name": "End of Todo", "date": "0" }
 ]

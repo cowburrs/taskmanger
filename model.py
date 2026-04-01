@@ -103,7 +103,12 @@ def lectureTask(
     )
 
 # TODO: week should be at the end, cause it should default to 1
-def lectureTasks(Subject: str, Week, Repeats: int, Sessions: list[list]):
+# def lectureTasks(Subject: str, Week, Repeats: int, Sessions: list[list]):
+#     return tuple(
+#         lectureTask(Subject, letter, Week, WeekDay, Start, Repeats)
+#         for letter, (WeekDay, Start) in zip("ABCDEFG", Sessions)
+#     )
+def lectureTasks(Subject: str, Repeats: int, Sessions: list[list], Week = 0):
     return tuple(
         lectureTask(Subject, letter, Week, WeekDay, Start, Repeats)
         for letter, (WeekDay, Start) in zip("ABCDEFG", Sessions)
@@ -258,15 +263,14 @@ tasks = [
     *lectureTasks(
         "math",
         6,
-        6,
         [
             [1, datetime(2026, 3, 30, 9)],
             [2, datetime(2026, 3, 30, 9)],
         ],
+        6,
     ),
     *lectureTasks(
         "comp",
-        6,
         6,
         [
             [0, datetime(2026, 3, 30, 14)],
@@ -274,14 +278,15 @@ tasks = [
             [2, datetime(2026, 3, 30, 12)],
             [3, datetime(2026, 3, 30, 8)],
         ],
+        6,
     ),
     *lectureTasks(
         "engn",
-        6,
         6,
         [
             [0, datetime(2026, 3, 30, 14)],
             [1, datetime(2026, 3, 30, 16)],
         ],
+        6,
     ),
 ]
