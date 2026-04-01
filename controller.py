@@ -109,6 +109,7 @@ def buildTasks():
     for task in tasks:
         evaluate(task)
     getToDo(datetime.now())
+    # TODO: Just add this pretier to the todo function in bash
     subprocess.run(["bash", "-c", "prettier --write *.json >/dev/null"])
 
 
