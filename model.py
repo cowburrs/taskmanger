@@ -102,7 +102,7 @@ def lectureTask(
         checkrepeats=justRepeats(Repeats),
     )
 
-
+# TODO: week should be at the end, cause it should default to 1
 def lectureTasks(Subject: str, Week, Repeats: int, Sessions: list[list]):
     return tuple(
         lectureTask(Subject, letter, Week, WeekDay, Start, Repeats)
