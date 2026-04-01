@@ -110,6 +110,8 @@ def lectureTasks(Subject: str, Week, Repeats: int, Sessions: list[list]):
     )
 
 
+# TODO: I reckon i'd want something like a 'instant delete' check, or like a checkdisappear
+# so that if it passes this timedelta, it wont show up as a task anymore
 @dataclass
 class Task:
     name: Callable[[datetime, int], str]
