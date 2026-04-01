@@ -163,6 +163,7 @@ tasks = [
         checkrepeats=justRepeats(6),
         checkstep=just(timedelta(hours=1)),
     ),
+    # TODO: quizTask could exist methinks
     Task(
         name=lambda date, n: f"Phys Week {week(date) - 8} Pre-Reading Quiz",
         conditions=[isDayWeek([0, 0])],
@@ -177,29 +178,8 @@ tasks = [
         checkstart=justValue(datetime(2026, 3, 30)),
         checkrepeats=justRepeats(6),
     ),
-    Task(
-        name=lambda date, n: f"Comp Week {n+6} LecA",
-        conditions=[isDayWeek([0, 0]), isNotTeachingBreak()],
-        duetime=dueTime(timedelta(5)),
-        checkstart=justValue(datetime(2026, 3, 30, 14)),
-        checkrepeats=justRepeats(6),
-    ),
     # TODO: I could make a schoolweek function, so that the names can be done better, an n function curry is what i mean to remove the date cause its bloat at the end of the day
     # TODO: wait i just remember what i was thinking, like schoolweek function for the name, like week - number of schoolweeks had, not currying
-    Task(
-        name=lambda date, n: f"Comp Week {n+6} LecB",
-        conditions=[isDayWeek([1, 1]), isNotTeachingBreak()],
-        duetime=dueTime(timedelta(5)),
-        checkstart=justValue(datetime(2026, 3, 30, 13)),
-        checkrepeats=justRepeats(6),
-    ),
-    Task(
-        name=lambda date, n: f"Comp Week {n + 6} LecC",
-        conditions=[isDayWeek([3, 3]), isNotTeachingBreak()],
-        duetime=dueTime(timedelta(5)),
-        checkstart=justValue(datetime(2026, 3, 30, 13)),
-        checkrepeats=justRepeats(6),
-    ),
     Task(
         name=lambda date, n: f"Comp Week {n + 6} Lab",
         conditions=[isDayWeek([4, 4]), isNotTeachingBreak()],
@@ -268,6 +248,25 @@ tasks = [
         [
             [1, datetime(2026, 3, 30, 9)],
             [2, datetime(2026, 3, 30, 9)],
+        ],
+    ),
+    *lectureTasks(
+        "comp",
+        6, 6,
+        [
+            [0, datetime(2026, 3, 30, 14)],
+            [1, datetime(2026, 3, 30, 15)],
+            [2, datetime(2026, 3, 30, 12)],
+            [3, datetime(2026, 3, 30, 8)],
+        ],
+    ),
+    *lectureTasks(
+        "engn",
+        6,
+        6,
+        [
+            [0, datetime(2026, 3, 30, 14)],
+            [1, datetime(2026, 3, 30, 16)],
         ],
     ),
 ]

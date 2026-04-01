@@ -31,7 +31,8 @@ def insertTask(task: Task, date: datetime, repeats):
     #     {
     #         "name": task.name(date, repeats),
     #         # "due": timedeltatostr(task.duetime(date) - datetime.now()),
-    #         "duedate": task.duetime(date).strftime("%B %d, %Y %H:%M:%S"),
+    #         # "duedate": task.duetime(date).strftime("%B %d, %Y %H:%M:%S"),
+    #         "date": str(date)
     #     }
     # )
 
@@ -50,6 +51,7 @@ def getAllUndone():
     pass
 
 
+# TODO: Expand this so that i can insert it into a different file, this doesnt need ot be just todo, cause its any date time, maybe str and another datetime, one to check at this time, another for the curren ttime, and string for the filename
 def getToDo(date: datetime):
     try:
         with open("tasks.json") as f:

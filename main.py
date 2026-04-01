@@ -20,3 +20,4 @@ todo.sort(key=lambda i: lookup.get((i["name"], i["date"]), float("inf"))) # i'm 
 
 for i in todo:
     print(i)
+    pass
