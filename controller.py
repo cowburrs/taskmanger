@@ -52,6 +52,8 @@ def getAllUndone():
 
 
 # TODO: Expand this so that i can insert it into a different file, this doesnt need ot be just todo, cause its any date time, maybe str and another datetime, one to check at this time, another for the curren ttime, and string for the filename
+# TODO: I could also make it so that it takes an input, a list of time when i'm busy, or something
+# TODO: And tell me how many hours i have left to work on something
 def getToDo(date: datetime):
     try:
         with open("tasks.json") as f:
