@@ -1,23 +1,31 @@
 import json
+import os
 
-from controller import buildTasks
+os.chdir(os.path.dirname(__file__))
+from controller import *
+from model import tasks
 
-buildTasks()
+date = datetime.now()
+
+with open("tasks.json", "w") as f:
+    json.dump([], f)
 
 try:
-    with open("todo.json") as f:
-        todo = json.load(f)
+    with open("done.json") as f:
+        done = json.load(f)
 except FileNotFoundError:
-    todo = []
-try:
-    with open("tasks.json") as f:
-        tasks = json.load(f)
-except FileNotFoundError:
-    tasks = []
-    # print(i)
-lookup = {(t["name"], t["date"]): t["due"] for t in tasks}
-todo.sort(key=lambda i: lookup.get((i["name"], i["date"]), float("inf"))) # i'm too fried for this shit bruh
+    done = []
+tasks = getTasks(tasks)
+todo = getToDo(datetime.now(), tasks, done)
 
+
+todo = sortByDue(todo)
+
+todo = list(map((lambda t: taskDictShorten(t, date)), todo))
 for i in todo:
     print(i)
     pass
+todo.append({"name": "End of Todo", "date": 0})
+
+with open("todo.json", "w") as f:
+    json.dump(todo, f)

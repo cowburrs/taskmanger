@@ -34,11 +34,7 @@ def isDayOfWeek(day: int) -> Callable[[datetime], bool]:
 
 
 def just(x):  # ITS A FUCKING POLYMORPHIC FUNCTION XDDDDDDDDDDDDDDDDDDDDDDD
-    return lambda _: x
-
-
-def justValue(x):
-    return lambda: x
+    return lambda *args: x
 
 
 def checkEndDefault():
@@ -64,12 +60,8 @@ def dueOn(date: datetime):
     return lambda _: date
 
 
-def infiniteRepeats():
-    return lambda _, __: -1
-
-
-def justName(s: str):
-    return lambda _, __: s
+def name(string: str, num=1, date=2):
+    return lambda d, n: string.format(num=n, date=d)
 
 
 def justRepeats(x: int):
@@ -84,10 +76,10 @@ def justRepeats(x: int):
 
 def oneTimeTask(Name: str, Start: datetime, Due: datetime):
     return Task(
-        name=justName(Name),
+        name=just(Name),
         conditions=[isDateTime(Start)],
         duetime=dueOn(Due),
-        checkstart=justValue(Start),
+        checkstart=just(Start),
     )
 
 
@@ -98,9 +90,10 @@ def lectureTask(
         name=lambda date, n: f"{Subject.capitalize()} Week {n + Week} Lec{Letter.upper()}",
         conditions=[isDayOfWeek(WeekDay), isNotTeachingBreak()],
         duetime=dueTime(timedelta(5)),
-        checkstart=justValue(Start),
+        checkstart=just(Start),
         checkrepeats=justRepeats(Repeats),
     )
+
 
 # TODO: week should be at the end, cause it should default to 1
 # def lectureTasks(Subject: str, Week, Repeats: int, Sessions: list[list]):
@@ -108,7 +101,7 @@ def lectureTask(
 #         lectureTask(Subject, letter, Week, WeekDay, Start, Repeats)
 #         for letter, (WeekDay, Start) in zip("ABCDEFG", Sessions)
 #     )
-def lectureTasks(Subject: str, Repeats: int, Sessions: list[list], Week = 0):
+def lectureTasks(Subject: str, Repeats: int, Sessions: list[list], Week=0):
     return tuple(
         lectureTask(Subject, letter, Week, WeekDay, Start, Repeats)
         for letter, (WeekDay, Start) in zip("ABCDEFG", Sessions)
@@ -116,11 +109,14 @@ def lectureTasks(Subject: str, Repeats: int, Sessions: list[list], Week = 0):
 
 
 def singleTasks(str: list[str]):
-    return tuple(justName(s) for s in str)
+    return tuple(Task(name=just(s)) for s in str)
 
 
 # TODO: I reckon i'd want something like a 'instant delete' check, or like a checkdisappear
 # so that if it passes this timedelta, it wont show up as a task anymore
+# TODO: new value, foresight or whatever, its how many days before due should i be able to
+# see it,like default is 0, so things only show up todo on time.
+# TODO: I think all not check functions deserve n, the number of times it is, or has shown up i mean
 @dataclass
 class Task:
     name: Callable[[datetime, int], str]
@@ -129,7 +125,7 @@ class Task:
     duetime: Callable[[datetime], datetime] = dueTimeDefault()  # 0 means never due
     importance: Callable[[datetime], int] = just(0)
     version: Callable[[datetime], float] = just(0)
-    checkstart: Callable[[], datetime] = justValue(datetime(2000, 1, 1))
+    checkstart: Callable[[], datetime] = just(datetime(2000, 1, 1))
     checkend: Callable[[datetime], datetime] = checkEndDefault()
     checkdelta: Callable[[datetime], timedelta] = just(
         timedelta(0)
@@ -143,6 +139,8 @@ class Task:
     )  # total number of repeats before it stop making -1 is inf (or any negative number, it stops at 0)
 
 
+# TODO: I could make it in controller, i could add 'done today', for tasks done today only, to see what i've done
+# TODO: put all the fucking stupid functions and class dataclass above in a separate file
 # TODO: Make this final bit modular and i havbe a working prototype
 # TODO: I think checkstep could be what i use
 # TODO: Textbook Chaptersssssssss, and lambda calculus things too
@@ -154,30 +152,30 @@ class Task:
 # TODO: I could incorporate gum cli prettier tool to ask like yes no do i want to gitshit and yes no do i want to go back and change/add more things
 # Or i could make it that when you do exit, it checks if done has been changed, and auto git add commits that. that sounds smart
 tasks = [
-    # TODO: i should make a function, which takes a list of strings, and creates a bunch of tasks with just a name justtname ykwim
-    Task(
-        name=justName("Understand Nullspaces"),
+    # TODO: Function that returns exception for task manager
+    # TODO: I could use gum in my cli tool, like as in to like 'you want to change add to todo' or as in like a 'do you wish to gitshit'
+    *singleTasks(
+        ["Understand Nullspaces", "vpython", "Comp lab 6 folds", "comp 5 final q"]
     ),
-    # *singleTasks(["Understand Nullspaces", "Kill myself", "Just kidding"]), # TODO: MAKE THIS SHIT WORK
     Task(
         name=lambda date, n: f"Phys Week {n + 6} Lectures",
         conditions=[isDayWeek([0, 0]), isNotTeachingBreak()],
         duetime=dueTime(timedelta(5)),
-        checkstart=justValue(datetime(2026, 3, 30)),
+        checkstart=just(datetime(2026, 3, 30)),
         checkrepeats=justRepeats(6),
     ),
     Task(
         name=lambda date, n: f"Phys Week {n+6} Lab Prep",
         conditions=[isDayWeek([0, 0]), isNotTeachingBreak()],
         duetime=dueIn(days=2, hours=13),
-        checkstart=justValue(datetime(2026, 3, 30)),
+        checkstart=just(datetime(2026, 3, 30)),
         checkrepeats=justRepeats(6),
     ),
     Task(
         name=lambda date, n: f"Phys Week {n+6} Lab Submission",
         conditions=[isDayWeek([2, 2]), isHour(13), isNotTeachingBreak()],
         duetime=dueIn(days=1, hours=4),
-        checkstart=justValue(datetime(2026, 3, 30)),
+        checkstart=just(datetime(2026, 3, 30)),
         checkrepeats=justRepeats(6),
         checkstep=just(timedelta(hours=1)),
     ),
@@ -186,14 +184,14 @@ tasks = [
         name=lambda date, n: f"Phys Week {week(date) - 8} Pre-Reading Quiz",
         conditions=[isDayWeek([0, 0])],
         duetime=dueTime(timedelta(24, hours=12)),
-        checkstart=justValue(datetime(2026, 3, 30)),
+        checkstart=just(datetime(2026, 3, 30)),
         checkrepeats=justRepeats(6),
     ),
     Task(
         name=lambda date, n: f"Phys Week {week(date) - 8} Workshop Quiz",
         conditions=[isDayWeek([0, 0])],
         duetime=dueTime(timedelta(24, hours=12)),
-        checkstart=justValue(datetime(2026, 3, 30)),
+        checkstart=just(datetime(2026, 3, 30)),
         checkrepeats=justRepeats(6),
     ),
     # TODO: I could make a schoolweek function, so that the names can be done better, an n function curry is what i mean to remove the date cause its bloat at the end of the day
@@ -202,14 +200,14 @@ tasks = [
         name=lambda date, n: f"Comp Week {n + 6} Lab",
         conditions=[isDayWeek([4, 4]), isNotTeachingBreak()],
         duetime=dueTime(timedelta(7)),
-        checkstart=justValue(datetime(2026, 3, 30, 13)),
+        checkstart=just(datetime(2026, 3, 30, 13)),
         checkrepeats=justRepeats(6),
     ),
     Task(
         name=lambda date, n: f"Math Week {n + 6} MatLab",
         conditions=[isDayOfWeek(0), isNotTeachingBreak()],
         duetime=dueTime(timedelta(3)),
-        checkstart=justValue(datetime(2026, 3, 30)),
+        checkstart=just(datetime(2026, 3, 30)),
         checkrepeats=justRepeats(6),
     ),
     # TODO: Names need to be done better just straight up
@@ -217,7 +215,7 @@ tasks = [
         name=lambda date, n: f"Math Week {n + 6} Assignment Q/Task",
         conditions=[isDayOfWeek(0), isNotTeachingBreak()],
         duetime=dueTime(timedelta(3)),
-        checkstart=justValue(datetime(2026, 3, 30)),
+        checkstart=just(datetime(2026, 3, 30)),
         checkrepeats=justRepeats(6),
     ),
     oneTimeTask(
@@ -288,11 +286,5 @@ tasks = [
             [1, datetime(2026, 3, 30, 16)],
         ],
         6,
-    ),
-    Task(
-        name=justName("Lab 6 final question, with folds and stuff"),
-    ),
-    Task(
-        name=justName("Lab 5 also"),
     ),
 ]
