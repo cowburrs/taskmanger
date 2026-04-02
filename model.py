@@ -289,4 +289,7 @@ tasks = [
         ],
         6,
     ),
+    Task(
+        name=justName("Lab 6 final question, with folds and stuff"),
+    ),
 ]
