@@ -155,7 +155,7 @@ tasks = [
     # TODO: Function that returns exception for task manager
     # TODO: I could use gum in my cli tool, like as in to like 'you want to change add to todo' or as in like a 'do you wish to gitshit'
     *singleTasks(
-        ["Understand Nullspaces", "vpython", "Comp lab 6 folds", "comp 5 final q"]
+        ["Understand Nullspaces", "vpython", "Comp lab 6 folds", "comp 5 final q", "gitignore vesktop and fonts", "make clear tabs task weekly"]
     ),
     Task(
         name=lambda date, n: f"Phys Week {n + 6} Lectures",
