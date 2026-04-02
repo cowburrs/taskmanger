@@ -292,4 +292,7 @@ tasks = [
     Task(
         name=justName("Lab 6 final question, with folds and stuff"),
     ),
+    Task(
+        name=justName("Lab 5 also"),
+    ),
 ]
