@@ -61,7 +61,28 @@ def dueOn(date: datetime):
 
 
 def name(string: str, num=1, date=2):
-    return lambda d, n: string.format(num=n, date=d)
+    return lambda d, n: string.format(num=n, date=d) # i want it to acess num, and for me
+# to name the {thing} variables
+
+
+def listToTextbook(l: list[int], chapstart=1):
+    result = list()
+    for x in range(len(l)):
+        for y in range(l[x]):
+            result.append(f"{x+chapstart}.{y+chapstart}")
+    return result
+
+
+# the list object has a function __len__. i think its what happens when you call
+# len on it, thats mindblowing honestly, you can define outer functions on an intter object
+
+
+def textbookTask(name, start: datetime, end: datetime, l: list[int]):
+    totalDelta = end - start
+    result = Task(
+    name=name("")
+    )
+    pass  # return some tuple
 
 
 def justRepeats(x: int):
@@ -137,6 +158,7 @@ class Task:
     checkrepeats: Callable[[datetime, int], int] = justRepeats(
         1
     )  # total number of repeats before it stop making -1 is inf (or any negative number, it stops at 0)
+    # TODO: foresight, lookahead, early, showdelta, showdate
 
 
 # TODO: I could make it in controller, i could add 'done today', for tasks done today only, to see what i've done
@@ -155,7 +177,15 @@ tasks = [
     # TODO: Function that returns exception for task manager
     # TODO: I could use gum in my cli tool, like as in to like 'you want to change add to todo' or as in like a 'do you wish to gitshit'
     *singleTasks(
-        ["Understand Nullspaces", "vpython", "Comp lab 6 folds", "comp 5 final q", "gitignore vesktop and fonts", "make clear tabs task weekly"]
+        [
+            "Understand Nullspaces",
+            "vpython",
+            "Comp lab 6 folds",
+            "comp 5 final q",
+            "gitignore vesktop and fonts",
+            "make clear tabs task weekly",
+            "debloat computer",
+        ]
     ),
     Task(
         name=lambda date, n: f"Phys Week {n + 6} Lectures",

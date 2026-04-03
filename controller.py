@@ -15,6 +15,12 @@ def getAssigned(t, date):
     else:
         return "N/A"
 
+def getPercentageDone(t, date):
+    if t["date"] != t["due"]:
+        return (datetoint(date) - t["date"])/(t["due"] - t["date"])
+    else:
+        return "N/A"
+
 
 def sortByDue(tasks):
     return sorted(tasks, key=lambda i: i.get("due", float("inf")))
@@ -31,6 +37,7 @@ def taskDictShorten(t, date):
     }
     if t["desc"] != "":
         taskdict["desc"] = t["desc"]
+    taskdict["%"] =  getPercentageDone(t, date) # TODO: I dont want this to show all the time, same with 
     taskdict["date"] = t["date"]
     return taskdict
 
@@ -81,6 +88,8 @@ def getAllDone():
 
 
 def getAllDoneToday():  # could make this function be implemented in get all done
+    pass
+def getDoneToFullTasks():  # could make this function be implemented in get all done
     pass
 
 
