@@ -18,6 +18,8 @@ try:
 except FileNotFoundError:
     done = []
 tasks = getTasks(tasks)
+# for i in tasks:
+#     print(i)
 todo = getToDo(datetime.now(), tasks, done)
 
 
@@ -28,9 +30,9 @@ for i in todo:
     print(i)
     pass
 todo.append({"name": "End of Todo", "date": 0})
-print("What?")
-print("{n}".format(n=2))
-print("nvm")
 
 with open("todo.json", "w") as f:
     json.dump(todo, f)
+
+with open("tasks.json", "w") as f:
+    json.dump(tasks, f)

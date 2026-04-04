@@ -19,7 +19,7 @@ def getPercentageDone(t, date):
     if t["date"] != t["due"]:
         return (datetoint(date) - t["date"])/(t["due"] - t["date"])
     else:
-        return "N/A"
+        return "0"
 
 
 def sortByDue(tasks):
@@ -37,7 +37,8 @@ def taskDictShorten(t, date):
     }
     if t["desc"] != "":
         taskdict["desc"] = t["desc"]
-    taskdict["%"] =  getPercentageDone(t, date) # TODO: I dont want this to show all the time, same with 
+    taskdict["%"] =  (getPercentageDone(t, date))  # TODO: I dont want this to show all the time, same with 
+    taskdict["%"] =  round(int(getPercentageDone(t, date)*100))
     taskdict["date"] = t["date"]
     return taskdict
 

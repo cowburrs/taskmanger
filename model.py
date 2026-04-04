@@ -60,9 +60,8 @@ def dueOn(date: datetime):
     return lambda _: date
 
 
-def name(string: str, num=1, date=2):
-    return lambda d, n: string.format(num=n, date=d) # i want it to acess num, and for me
-# to name the {thing} variables
+def name(string: str, n="num", d="date"):
+    return lambda date, num: string.format(**{n: num, d: date})
 
 
 def listToTextbook(l: list[int], chapstart=1):
@@ -77,14 +76,6 @@ def listToTextbook(l: list[int], chapstart=1):
 # len on it, thats mindblowing honestly, you can define outer functions on an intter object
 
 
-def textbookTask(name, start: datetime, end: datetime, l: list[int]):
-    totalDelta = end - start
-    result = Task(
-    name=name("")
-    )
-    pass  # return some tuple
-
-
 def justRepeats(x: int):
     def repeatsN(_, n):
         if n == -1:
@@ -94,6 +85,18 @@ def justRepeats(x: int):
 
     return repeatsN
 
+
+def textBookTasks(bookname, start: datetime, end: datetime, l: list[int]):
+    totalDelta = end - start
+    textbookchaps = listToTextbook(l)
+    delta = totalDelta / (len(textbookchaps))
+    return Task(
+            name=lambda _, n: f"{bookname} Chapter {textbookchaps[n]}",
+            conditions=[(just(True))],
+            checkstart=just(start),
+            checkrepeats=justRepeats(len(textbookchaps)),
+            checkstep=just(delta)
+        )
 
 def oneTimeTask(Name: str, Start: datetime, Due: datetime):
     return Task(
@@ -148,10 +151,6 @@ class Task:
     version: Callable[[datetime], float] = just(0)
     checkstart: Callable[[], datetime] = just(datetime(2000, 1, 1))
     checkend: Callable[[datetime], datetime] = checkEndDefault()
-    checkdelta: Callable[[datetime], timedelta] = just(
-        timedelta(0)
-    )  # 0 means no checkdelta
-    checktime: datetime | None = None
     checkstep: Callable[[datetime], timedelta] = just(
         timedelta(1)
     )  # time between each check, so like daily or hourly, minutely is possible. secondly not implementable though can be thought of as dt
@@ -317,4 +316,5 @@ tasks = [
         ],
         6,
     ),
+textBookTasks("Jstweart", datetime(2026, 4, 4), datetime(2026, 5, 4), [6, 8, 7, 5, 8, 6, 7, 8, 5, 9, 8, 8, 9])
 ]
