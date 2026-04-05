@@ -1,0 +1,282 @@
+-- model.lua
+local funcs = require("src/funcs")
+
+-- ─── Datetime helper ──────────────────────────────────────────────────────────
+
+local function dt(year, month, day, hour, min, sec)
+	return os.time({ year = year, month = month, day = day, hour = hour or 0, min = min or 0, sec = sec or 0 })
+end
+
+local DAY = 86400
+local HOUR = 3600
+local MIN = 60
+
+local function timedelta(days, hours, minutes, weeks, seconds)
+	return (days or 0) * DAY + (hours or 0) * HOUR + (minutes or 0) * MIN + (weeks or 0) * DAY * 7 + (seconds or 0)
+end
+
+-- ─── Condition helpers ────────────────────────────────────────────────────────
+
+local function isDateTime(day)
+	return function(date)
+		return day == date
+	end
+end
+
+local function isHour(hour)
+	return function(date)
+		return hour == os.date("*t", date).hour
+	end
+end
+
+local function isAbsWeek(w)
+	return function(date)
+		return w == funcs.absweek(date)
+	end
+end
+
+local function isNot(func)
+	return function(x)
+		return not func(x)
+	end
+end
+
+local function isNotTeachingBreak()
+	return function(date)
+		local aw = funcs.absweek(date)
+		return aw ~= 2936 and aw ~= 2937
+	end
+end
+
+local function isDayWeek(dayslist)
+	return function(date)
+		local dow = funcs.dayofweek(date)
+		for _, x in ipairs(dayslist) do
+			if dow == (x % 7) then
+				return true
+			end
+		end
+		return false
+	end
+end
+
+local function isDayOfWeek(day)
+	return function(date)
+		return funcs.dayofweek(date) == (day % 7)
+	end
+end
+
+-- ─── Core helpers ─────────────────────────────────────────────────────────────
+
+local function just(x) -- ITS A FUCKING POLYMORPHIC FUNCTION XDDDDDDDDDDDDDDDDDDDDDDD
+	return function(...)
+		return x
+	end
+end
+
+local function checkEndDefault()
+	return function(x)
+		return x + 100 * 365 * DAY
+	end
+end
+
+local function dueTimeDefault()
+	return function(x)
+		return x
+	end
+end
+
+local function dueTime(delta)
+	return function(x)
+		return x + delta
+	end
+end
+
+local function dueIn(days, hours, minutes, weeks, seconds)
+	local delta = timedelta(days, hours, minutes, weeks, seconds)
+	return function(x)
+		return x + delta
+	end
+end
+
+local function dueOn(date)
+	return function(_)
+		return date
+	end
+end
+
+local function listToTextbook(l)
+	chapstart = chapstart or 1
+	local result = {}
+	for x = 1, #l do
+		for y = 1, l[x] do
+			table.insert(result, (x - 1 + chapstart) .. "." .. (y - 1 + chapstart))
+		end
+	end
+	return result
+end
+
+-- the list object has a function __len. i think its what happens when you call
+-- len on it, thats mindblowing honestly, you can define outer functions on an inner object
+
+local function justRepeats(x)
+	local function repeatsN(_, n)
+		if n == -1 then
+			return x
+		else
+			return n - 1
+		end
+	end
+	return repeatsN
+end
+
+-- ─── Task ─────────────────────────────────────────────────────────────────────
+
+-- TODO: I reckon i'd want something like a 'instant delete' check, or like a checkdisappear
+-- so that if it passes this timedelta, it wont show up as a task anymore
+-- TODO: new value, foresight or whatever, its how many days before due should i be able to
+-- see it, like default is 0, so things only show up todo on time.
+-- TODO: I think all not check functions deserve n, the number of times it is, or has shown up i mean
+local function Task(opts)
+	assert(opts.name, "Task requires a name")
+	return {
+		name = opts.name, --
+		conditions = opts.conditions or {},
+		description = opts.description or just(""),
+		duetime = opts.duetime or dueTimeDefault(), -- 0 means never due
+		importance = opts.importance or just(0),
+		version = opts.version or just(0),
+		checkstart = opts.checkstart or just(dt(2000, 1, 1)),
+		checkend = opts.checkend or checkEndDefault(),
+		checkstep = opts.checkstep or just(DAY), -- time between each check, so like daily or hourly, minutely is possible. secondly not implementable though can be thought of as dt
+		checkrepeats = opts.checkrepeats or justRepeats(1), -- total number of repeats before it stops, -1 is inf (or any negative number, it stops at 0)
+		-- TODO: foresight, lookahead, early, showdelta, showdate
+	}
+end
+
+-- ─── Task constructors ────────────────────────────────────────────────────────
+
+local function textBookTasks(bookname, start, finish, l)
+	local totalDelta = finish - start
+	local textbookchaps = listToTextbook(l)
+	local delta = totalDelta / #textbookchaps
+	return Task({
+		name = function(_, n)
+			return bookname .. " Chapter " .. textbookchaps[n + 1]
+		end,
+		conditions = { just(true) },
+		checkstart = just(start),
+		checkrepeats = justRepeats(#textbookchaps),
+		checkstep = just(delta),
+	})
+end
+
+local function oneTimeTask(Name, Start, Due)
+	return Task({
+		name = just(Name),
+		conditions = { isDateTime(Start) },
+		duetime = dueOn(Due),
+		checkstart = just(Start),
+	})
+end
+
+local function lectureTask(Subject, Letter, Week, WeekDay, Start, Repeats)
+	return Task({
+		name = function(date, n)
+			return Subject:sub(1, 1):upper() .. Subject:sub(2) .. " Week " .. (n + Week) .. " Lec" .. Letter:upper()
+		end,
+		conditions = { isDayOfWeek(WeekDay), isNotTeachingBreak() },
+		duetime = dueTime(timedelta(2)),
+		checkstart = just(Start),
+		checkrepeats = justRepeats(Repeats),
+	})
+end
+
+-- TODO: week should be at the end, cause it should default to 1
+-- def lectureTasks(Subject: str, Week, Repeats: int, Sessions: list[list]):
+--     return tuple(
+--         lectureTask(Subject, letter, Week, WeekDay, Start, Repeats)
+--         for letter, (WeekDay, Start) in zip("ABCDEFG", Sessions)
+--     )
+local function lectureTasks(Subject, Repeats, Sessions, Week)
+	Week = Week or 0
+	local letters = { "A", "B", "C", "D", "E", "F", "G" }
+	local result = {}
+	for i, session in ipairs(Sessions) do
+		table.insert(result, lectureTask(Subject, letters[i], Week, session[1], session[2], Repeats))
+	end
+	return table.unpack(result)
+end
+
+local function singleTasks(strs)
+	local result = {}
+	for _, s in ipairs(strs) do
+		table.insert(result, Task({ name = just(s) }))
+	end
+	return result
+end
+
+
+-- ─── Tasks list ───────────────────────────────────────────────────────────────
+
+-- TODO: I could make it in controller, i could add 'done today', for tasks done today only, to see what i've done
+-- TODO: put all the fucking stupid functions and class dataclass above in a separate file
+-- TODO: Make this final bit modular and i have a working prototype
+-- TODO: I think checkstep could be what i use
+-- TODO: Textbook Chaptersssssssss, and lambda calculus things too
+-- how do i even do textbook chapters? when they're different like 7.1-7.5 vs 4.1-4.13, i have an idea, a list of ints, each for the size of each chapter, and yeah yeah yeah i got it
+-- I could just make a list of chapter lengths [1, 3, 5], and it will expand it to a total list
+-- like 1.1, 2.1, 2.2, 2.3, 3.1, 3.2, 3.3, 3.4, 3.5
+-- and just index into it based on how many times repeated, like []
+-- TODO: I should make constructors for tasks, like currying so that i dont have to specify everything, for example lecture tasks are like 3 days due date and stuff(or no due date if i decide to change in the future)
+-- TODO: I could incorporate gum cli prettier tool to ask like yes no do i want to gitshit and yes no do i want to go back and change/add more things
+-- Or i could make it that when you do exit, it checks if done has been changed, and auto git add commits that. that sounds smart
+-- print(dump(luafiles))
+-- local school = require("tasks.school")
+
+-- TODO: Function that returns exception for task manager
+-- TODO: I could use gum in my cli tool, like as in to like 'you want to change add to todo' or as in like a 'do you wish to gitshit'
+
+
+
+-- TODO: quizTask could exist methinks
+
+-- TODO: I could make a schoolweek function, so that the names can be done better, an n function curry is what i mean to remove the date cause its bloat at the end of the day
+-- TODO: wait i just remember what i was thinking, like schoolweek function for the name, like week - number of schoolweeks had, not currying
+
+
+-- TODO: Names need to be done better just straight up
+
+
+
+
+return {
+	DAY = DAY,
+	HOUR = HOUR,
+	MIN = MIN,
+	timedelta = timedelta,
+	dt = dt,
+	isDateTime = isDateTime,
+	isHour = isHour,
+	isAbsWeek = isAbsWeek,
+	isNot = isNot,
+	isNotTeachingBreak = isNotTeachingBreak,
+	isDayWeek = isDayWeek,
+	isDayOfWeek = isDayOfWeek,
+	just = just,
+	checkEndDefault = checkEndDefault,
+	dueTimeDefault = dueTimeDefault,
+	dueTime = dueTime,
+	dueIn = dueIn,
+	dueOn = dueOn,
+	justRepeats = justRepeats,
+	listToTextbook = listToTextbook,
+	tasks = tasks,
+	Task = Task,
+	textBookTasks = textBookTasks,
+	oneTimeTask = oneTimeTask,
+	lectureTask = lectureTask,
+	lectureTasks = lectureTasks,
+	singleTasks = singleTasks,
+	spread = spread,
+}
