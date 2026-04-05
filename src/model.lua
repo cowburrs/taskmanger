@@ -106,11 +106,10 @@ local function dueOn(date)
 end
 
 local function listToTextbook(l)
-	chapstart = chapstart or 1
 	local result = {}
 	for x = 1, #l do
 		for y = 1, l[x] do
-			table.insert(result, (x - 1 + chapstart) .. "." .. (y - 1 + chapstart))
+			table.insert(result, (x) .. "." .. (y))
 		end
 	end
 	return result
@@ -160,7 +159,7 @@ local function textBookTasks(bookname, start, finish, l)
 	local totalDelta = finish - start
 	local textbookchaps = listToTextbook(l)
 	local delta = totalDelta / #textbookchaps
-	return Task({
+	return {
 		name = function(_, n)
 			return bookname .. " Chapter " .. textbookchaps[n + 1]
 		end,
@@ -168,20 +167,20 @@ local function textBookTasks(bookname, start, finish, l)
 		checkstart = just(start),
 		checkrepeats = justRepeats(#textbookchaps),
 		checkstep = just(delta),
-	})
+	}
 end
 
 local function oneTimeTask(Name, Start, Due)
-	return Task({
+	return {
 		name = just(Name),
 		conditions = { isDateTime(Start) },
 		duetime = dueOn(Due),
 		checkstart = just(Start),
-	})
+	}
 end
 
 local function lectureTask(Subject, Letter, Week, WeekDay, Start, Repeats)
-	return Task({
+	return {
 		name = function(date, n)
 			return Subject:sub(1, 1):upper() .. Subject:sub(2) .. " Week " .. (n + Week) .. " Lec" .. Letter:upper()
 		end,
@@ -189,8 +188,10 @@ local function lectureTask(Subject, Letter, Week, WeekDay, Start, Repeats)
 		duetime = dueTime(timedelta(2)),
 		checkstart = just(Start),
 		checkrepeats = justRepeats(Repeats),
-	})
+	}
 end
+-- local function subjectWeeklyTask()
+-- end
 
 -- TODO: week should be at the end, cause it should default to 1
 -- def lectureTasks(Subject: str, Week, Repeats: int, Sessions: list[list]):
@@ -205,7 +206,7 @@ local function lectureTasks(Subject, Repeats, Sessions, Week)
 	for i, session in ipairs(Sessions) do
 		table.insert(result, lectureTask(Subject, letters[i], Week, session[1], session[2], Repeats))
 	end
-	return table.unpack(result)
+	return result
 end
 
 local function singleTasks(strs)
@@ -215,7 +216,6 @@ local function singleTasks(strs)
 	end
 	return result
 end
-
 
 -- ─── Tasks list ───────────────────────────────────────────────────────────────
 
@@ -237,18 +237,12 @@ end
 -- TODO: Function that returns exception for task manager
 -- TODO: I could use gum in my cli tool, like as in to like 'you want to change add to todo' or as in like a 'do you wish to gitshit'
 
-
-
 -- TODO: quizTask could exist methinks
 
 -- TODO: I could make a schoolweek function, so that the names can be done better, an n function curry is what i mean to remove the date cause its bloat at the end of the day
 -- TODO: wait i just remember what i was thinking, like schoolweek function for the name, like week - number of schoolweeks had, not currying
 
-
 -- TODO: Names need to be done better just straight up
-
-
-
 
 return {
 	DAY = DAY,

@@ -63,6 +63,9 @@ local function taskDictShorten(t, date)
 	return taskdict
 end
 
+local function shortDictPrint(t)
+	print(string.format("[%3d%%] %-30s assigned: %-20s due: %s", t["%"], t.name, t.assigned, t.due or "N/A"))
+end
 -- ─── Task creation ────────────────────────────────────────────────────────────
 
 local function createTask(task, date, repeats)
@@ -73,34 +76,42 @@ local function createTask(task, date, repeats)
 		due = datetoint(task.duetime(date)),
 		prio = task.importance(date),
 		ver = task.version(date),
-		num = repeats, -- num repeats
+		num = repeats,
 	}
 end
 
 -- TODO: i just had the best fucking idea ever, how about instead of parsing into done
 -- I make it create another json, donetasks.json, with donetasks but in proper format
 -- so i dont have to kill myself again and again
-local function getAllUndone()
-	-- pass
-end
-
--- TODO: implement lookahead/foresight, and make things not disappear or whatever
-local function getToDo(date, tasks, done)
-	local todo = {}
+local function getAllUndone(tasks, done)
+	done = done or {}
 	local donetasks = {}
-
 	for _, d in ipairs(done) do
 		donetasks[d.name] = donetasks[d.name] or {}
 		donetasks[d.name][d.date] = true
 	end
-
+	local undone = {}
 	for _, i in ipairs(tasks) do
-		if inttodate(i.date) <= date and not (donetasks[i.name] and donetasks[i.name][i.date]) then
-			table.insert(todo, i)
+		if not (donetasks[i.name] and donetasks[i.name][i.date]) then
+			table.insert(undone, i)
 		end
 	end
+	return undone
+end
 
-	return todo
+local function getAllDue(date, tasks)
+	local due = {}
+	for _, value in ipairs(tasks) do
+		if value.date <= datetoint(date) then
+			table.insert(due, value)
+		end
+	end
+	return due
+end
+
+-- TODO: implement lookahead/foresight, and make things not disappear or whatever
+local function getToDo(date, tasks, done)
+	return getAllUndone(getAllDue(date, tasks), done)
 end
 
 local function getAllTodo(date) -- TODO: print all even not done
@@ -112,10 +123,6 @@ local function getUpcoming(date)
 end
 
 local function getAll()
-	-- pass
-end
-
-local function getAllDone()
 	-- pass
 end
 
@@ -188,7 +195,9 @@ return {
 	getAllTodo = getAllTodo,
 	getUpcoming = getUpcoming,
 	getAll = getAll,
-	getAllDone = getAllDone,
+	-- getAllDone = getAllDone,
 	getAllDoneToday = getAllDoneToday,
 	getDoneToFullTasks = getDoneToFullTasks,
+	getAllDue = getAllDue,
+	shortDictPrint = shortDictPrint,
 }

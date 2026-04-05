@@ -31,17 +31,27 @@ end
 
 local date = os.time()
 
-local done = openfile("done.json")
-
 local modeltasks = {}
 local dir = require("pl.dir")
 local luafiles = dir.getallfiles("tasks", "*.lua")
-for index, value in ipairs(require("tasks.school")) do
-	table.insert(modeltasks, model.Task(value))
+local function getTasks(result, tasks)
+	for _, value in ipairs(tasks) do
+		if type(value) == "table" then
+			if value.name then
+				table.insert(result, model.Task(value))
+			else
+				getTasks(result, value)
+			end
+		end
+	end
 end
-
+getTasks(modeltasks, require("tasks.school"))
+-- for index, value in ipairs(require("tasks.school")) do
+-- 	table.insert(modeltasks, model.Task(value))
+-- end
 
 local tasks = controller.getTasks(modeltasks)
+local done = openfile("done.json")
 
 local todo = controller.getToDo(date, tasks, done)
 todo = controller.sortByDue(todo)
@@ -53,11 +63,12 @@ for _, t in ipairs(todo) do
 	if type(s) == "table" and next(s) ~= nil then
 		table.insert(shortened, s)
 	end
-	print(dump(s))
+	controller.shortDictPrint(s)
 end
 
 table.insert(shortened, { name = "End of Todo", date = 0 })
 
 writefile("json/todo.json", shortened)
+writefile("json/tasks.json", tasks)
 -- tf:write(json.encode(shortened))
 --
