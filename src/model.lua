@@ -1,4 +1,3 @@
--- model.lua
 local funcs = require("src/funcs")
 
 -- ─── Datetime helper ──────────────────────────────────────────────────────────
@@ -109,14 +108,11 @@ local function listToTextbook(l)
 	local result = {}
 	for x = 1, #l do
 		for y = 1, l[x] do
-			table.insert(result, (x) .. "." .. (y))
+			table.insert(result, x .. "." .. y)
 		end
 	end
 	return result
 end
-
--- the list object has a function __len. i think its what happens when you call
--- len on it, thats mindblowing honestly, you can define outer functions on an inner object
 
 local function justRepeats(x)
 	local function repeatsN(_, n)
@@ -131,25 +127,22 @@ end
 
 -- ─── Task ─────────────────────────────────────────────────────────────────────
 
--- TODO: I reckon i'd want something like a 'instant delete' check, or like a checkdisappear
--- so that if it passes this timedelta, it wont show up as a task anymore
--- TODO: new value, foresight or whatever, its how many days before due should i be able to
--- see it, like default is 0, so things only show up todo on time.
 -- TODO: I think all not check functions deserve n, the number of times it is, or has shown up i mean
 local function Task(opts)
 	assert(opts.name, "Task requires a name")
 	return {
-		name = opts.name, --
+		name = opts.name, 
 		conditions = opts.conditions or {},
 		description = opts.description or just(""),
 		duetime = opts.duetime or dueTimeDefault(), -- 0 means never due
+		finishdelta = opts.finishdelta or just(timedelta()),
+		showdelta = opts.showdelta or just(timedelta(1)),
 		importance = opts.importance or just(0),
 		version = opts.version or just(0),
 		checkstart = opts.checkstart or just(dt(2000, 1, 1)),
 		checkend = opts.checkend or checkEndDefault(),
 		checkstep = opts.checkstep or just(DAY), -- time between each check, so like daily or hourly, minutely is possible. secondly not implementable though can be thought of as dt
 		checkrepeats = opts.checkrepeats or justRepeats(1), -- total number of repeats before it stops, -1 is inf (or any negative number, it stops at 0)
-		-- TODO: foresight, lookahead, early, showdelta, showdate
 	}
 end
 
@@ -185,7 +178,7 @@ local function lectureTask(Subject, Letter, Week, WeekDay, Start, Repeats)
 			return Subject:sub(1, 1):upper() .. Subject:sub(2) .. " Week " .. (n + Week) .. " Lec" .. Letter:upper()
 		end,
 		conditions = { isDayOfWeek(WeekDay), isNotTeachingBreak() },
-		duetime = dueTime(timedelta(2)),
+		duetime = dueTime(timedelta(3)),
 		checkstart = just(Start),
 		checkrepeats = justRepeats(Repeats),
 	}
@@ -193,12 +186,7 @@ end
 -- local function subjectWeeklyTask()
 -- end
 
--- TODO: week should be at the end, cause it should default to 1
--- def lectureTasks(Subject: str, Week, Repeats: int, Sessions: list[list]):
---     return tuple(
---         lectureTask(Subject, letter, Week, WeekDay, Start, Repeats)
---         for letter, (WeekDay, Start) in zip("ABCDEFG", Sessions)
---     )
+
 local function lectureTasks(Subject, Repeats, Sessions, Week)
 	Week = Week or 0
 	local letters = { "A", "B", "C", "D", "E", "F", "G" }
@@ -216,28 +204,34 @@ local function singleTasks(strs)
 	end
 	return result
 end
+--  quizTask could exist methinks
+local function quizTask(subject, name, checkstart, duetime, repeats, startnum)
+	startnum = startnum or 0
+	return {
+		name = function(_, n)
+			return subject .. " Week " .. (n + startnum) .. " " .. name
+		end,
+		conditions = { isDayOfWeek(0), isNotTeachingBreak() },
+		duetime = dueTime(duetime),
+		checkstart = just(checkstart),
+		checkrepeats = justRepeats(repeats),
+	}
+end
 
 -- ─── Tasks list ───────────────────────────────────────────────────────────────
 
--- TODO: I could make it in controller, i could add 'done today', for tasks done today only, to see what i've done
 -- TODO: put all the fucking stupid functions and class dataclass above in a separate file
 -- TODO: Make this final bit modular and i have a working prototype
 -- TODO: I think checkstep could be what i use
--- TODO: Textbook Chaptersssssssss, and lambda calculus things too
--- how do i even do textbook chapters? when they're different like 7.1-7.5 vs 4.1-4.13, i have an idea, a list of ints, each for the size of each chapter, and yeah yeah yeah i got it
--- I could just make a list of chapter lengths [1, 3, 5], and it will expand it to a total list
--- like 1.1, 2.1, 2.2, 2.3, 3.1, 3.2, 3.3, 3.4, 3.5
+-- TODO: now just lambda calculus worksheets
 -- and just index into it based on how many times repeated, like []
 -- TODO: I should make constructors for tasks, like currying so that i dont have to specify everything, for example lecture tasks are like 3 days due date and stuff(or no due date if i decide to change in the future)
+-- TODO: I could use gum in my cli tool, like as in to like 'you want to change add to todo' or as in like a 'do you wish to gitshit'
 -- TODO: I could incorporate gum cli prettier tool to ask like yes no do i want to gitshit and yes no do i want to go back and change/add more things
 -- Or i could make it that when you do exit, it checks if done has been changed, and auto git add commits that. that sounds smart
 -- print(dump(luafiles))
 -- local school = require("tasks.school")
 
--- TODO: Function that returns exception for task manager
--- TODO: I could use gum in my cli tool, like as in to like 'you want to change add to todo' or as in like a 'do you wish to gitshit'
-
--- TODO: quizTask could exist methinks
 
 -- TODO: I could make a schoolweek function, so that the names can be done better, an n function curry is what i mean to remove the date cause its bloat at the end of the day
 -- TODO: wait i just remember what i was thinking, like schoolweek function for the name, like week - number of schoolweeks had, not currying
@@ -265,12 +259,11 @@ return {
 	dueOn = dueOn,
 	justRepeats = justRepeats,
 	listToTextbook = listToTextbook,
-	tasks = tasks,
 	Task = Task,
 	textBookTasks = textBookTasks,
 	oneTimeTask = oneTimeTask,
 	lectureTask = lectureTask,
 	lectureTasks = lectureTasks,
 	singleTasks = singleTasks,
-	spread = spread,
+	quizTask = quizTask,
 }

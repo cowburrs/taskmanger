@@ -27,17 +27,9 @@ local lectureTask = m.lectureTask
 local lectureTasks = m.lectureTasks
 local singleTasks = m.singleTasks
 local spread = m.spread
+local quizTask = m.quizTask
 local funcs = require("src.funcs")
 local returntable = {
-	{
-		name = function(date, n)
-			return "Phys Week " .. (n + 6) .. " Lectures"
-		end,
-		conditions = { isDayWeek({ 0, 0 }), isNotTeachingBreak() },
-		duetime = dueTime(timedelta(5)),
-		checkstart = just(dt(2026, 3, 30)),
-		checkrepeats = justRepeats(6),
-	},
 	oneTimeTask("Engn Team (TMC1)", dt(2026, 3, 30), dt(2026, 4, 19)),
 	oneTimeTask("Engn Milestone 3", dt(2026, 3, 30), dt(2026, 4, 21)),
 	oneTimeTask("Engn Self-Assessment Milestone 3", dt(2026, 4, 21), dt(2026, 4, 28)),
@@ -57,15 +49,6 @@ local returntable = {
 	},
 	{
 		name = function(date, n)
-			return "Math Week " .. (n + 6) .. " MatLab"
-		end,
-		conditions = { isDayOfWeek(0), isNotTeachingBreak() },
-		duetime = dueTime(timedelta(3)),
-		checkstart = just(dt(2026, 3, 30)),
-		checkrepeats = justRepeats(6),
-	},
-	{
-		name = function(date, n)
 			return "Comp Week " .. (n + 6) .. " Lab"
 		end,
 		conditions = { isDayWeek({ 4, 4 }), isNotTeachingBreak() },
@@ -73,21 +56,16 @@ local returntable = {
 		checkstart = just(dt(2026, 3, 30, 13)),
 		checkrepeats = justRepeats(6),
 	},
+	quizTask("Math", "MatLab", dt(2026, 3, 30), timedelta(3), 6, 6),
+	quizTask("Phys", "Workshop Quiz", dt(2026, 3, 30), timedelta(24, 12), 6, 6),
+	quizTask("Phys", "Pre-Reading Quiz", dt(2026, 3, 30), timedelta(24, 12), 6, 6),
+	quizTask("Phys", "Lectures", dt(2026, 3, 30), timedelta(5), 6, 6),
 	{
 		name = function(date, n)
-			return "Phys Week " .. (funcs.week(date) - 8) .. " Workshop Quiz"
+			return "Phys Week " .. (n + 6) .. " Lab Prep"
 		end,
-		conditions = { isDayWeek({ 0, 0 }) },
-		duetime = dueTime(timedelta(24, 12)),
-		checkstart = just(dt(2026, 3, 30)),
-		checkrepeats = justRepeats(6),
-	},
-	{
-		name = function(date, n)
-			return "Phys Week " .. (funcs.week(date) - 8) .. " Pre-Reading Quiz"
-		end,
-		conditions = { isDayWeek({ 0, 0 }) },
-		duetime = dueTime(timedelta(24, 12)),
+		conditions = { isDayWeek({ 0, 0 }), isNotTeachingBreak() },
+		duetime = dueIn(2, 13),
 		checkstart = just(dt(2026, 3, 30)),
 		checkrepeats = justRepeats(6),
 	},
@@ -100,15 +78,6 @@ local returntable = {
 		checkstart = just(dt(2026, 3, 30)),
 		checkrepeats = justRepeats(6),
 		checkstep = just(HOUR),
-	},
-	{
-		name = function(date, n)
-			return "Phys Week " .. (n + 6) .. " Lab Prep"
-		end,
-		conditions = { isDayWeek({ 0, 0 }), isNotTeachingBreak() },
-		duetime = dueIn(2, 13),
-		checkstart = just(dt(2026, 3, 30)),
-		checkrepeats = justRepeats(6),
 	},
 	lectureTasks("math", 6, {
 		{ 1, dt(2026, 3, 30, 9) },
@@ -132,6 +101,7 @@ local returntable = {
 		"gitignore vesktop and fonts",
 		"make clear tabs task weekly",
 		"debloat computer",
+		"shellnix/devenvs",
 	}),
 	-- textBookTasks("Jstweart", dt(2026, 4, 4), dt(2026, 5, 4), { 6, 8, 7, 5, 8, 6, 7, 8, 5, 9, 8, 8, 9 }),
 }

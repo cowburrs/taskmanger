@@ -1,3 +1,4 @@
+-- This file is effectively a 'view', completing the mvc. hell you can count the bash script i made a 'view'
 local json = require("dkjson")
 local lfs = require("lfs")
 
@@ -31,27 +32,49 @@ end
 
 local date = os.time()
 
-local modeltasks = {}
 local dir = require("pl.dir")
+local path = require("pl.path")
+local tablex = require("pl.tablex")
+
 local luafiles = dir.getallfiles("tasks", "*.lua")
-local function getTasks(result, tasks)
-	for _, value in ipairs(tasks) do
-		if type(value) == "table" then
-			if value.name then
-				table.insert(result, model.Task(value))
-			else
-				getTasks(result, value)
+luafiles = tablex.map(function(x)
+	local no_ext = path.splitext(x)
+	return no_ext:gsub("[/\\]", ".")
+end, luafiles)
+
+print_r(luafiles)
+local function fileToTasks(file)
+	local t = {}
+	local function f(result, tasks) -- This is so fucking stupid
+		for _, value in ipairs(tasks) do
+			if type(value) == "table" then
+				if value.name then
+					table.insert(result, model.Task(value))
+				else
+					f(result, value)
+				end
 			end
 		end
 	end
+	f(t, file)
+	return t
 end
-getTasks(modeltasks, require("tasks.school"))
--- for index, value in ipairs(require("tasks.school")) do
--- 	table.insert(modeltasks, model.Task(value))
--- end
+local modeltasks = {}
+for _, value in ipairs(luafiles) do -- TODO: fuycking imperitive programming
+	print(value)
+	for _, task in ipairs(fileToTasks(require(value))) do
+
+		table.insert(modeltasks, task)
+		
+	end
+end
 
 local tasks = controller.getTasks(modeltasks)
-local done = openfile("done.json")
+local donefile = openfile("done.json")
+local done = {}
+for _, value in ipairs(donefile) do
+	table.insert(done, { name = value[1], date = value[2], done = value[3] })
+end
 
 local todo = controller.getToDo(date, tasks, done)
 todo = controller.sortByDue(todo)
@@ -63,12 +86,18 @@ for _, t in ipairs(todo) do
 	if type(s) == "table" and next(s) ~= nil then
 		table.insert(shortened, s)
 	end
-	controller.shortDictPrint(s)
 end
+controller.shortDictPrint(shortened)
+print()
+print("-| Done Today |-")
+controller.doneTaskPrint(controller.getDoneToday(date, done), date)
 
 table.insert(shortened, { name = "End of Todo", date = 0 })
-
-writefile("json/todo.json", shortened)
+local todofile = {}
+for _, value in ipairs(shortened) do
+	table.insert(todofile, { value["name"], value["date"], date })
+end
+writefile("json/todo.json", todofile)
 writefile("json/tasks.json", tasks)
 -- tf:write(json.encode(shortened))
 --

@@ -1,4 +1,3 @@
--- controller.lua
 local funcs = require("src/funcs")
 
 local inttodate = funcs.inttodate
@@ -17,16 +16,16 @@ end
 
 local function getAssigned(t, date)
 	local epoch2000 = os.time({ year = 2000, month = 1, day = 1, hour = 0, min = 0, sec = 0 })
-	if t.date ~= epoch2000 then
+	if inttodate(t.date) ~= epoch2000 then
 		return timedeltatostr(inttodate(t.date) - date)
 	else
 		return "N/A"
 	end
 end
 
-local function getPercentageDone(t, date) -- TODO: This doesnt work
+local function getPercentageDone(t, date)
 	if t.date ~= t.due then
-		return (datetoint(date) - t.date) / (t.due - t.date)
+		return (date - inttodate(t.date)) / (inttodate(t.due) - inttodate(t.date))
 	else
 		return 0
 	end
@@ -47,7 +46,6 @@ end
 
 -- TODO: I could also make it so that it takes an input, a list of time when i'm busy, or something
 -- And tell me how many hours i have left to work on something
--- TODO: Add percentage, percentage time of due date done, so if half of due date has been exhausted then 50%
 local function taskDictShorten(t, date)
 	local taskdict = {
 		name = t.name,
@@ -57,14 +55,21 @@ local function taskDictShorten(t, date)
 	if t.desc ~= "" then
 		taskdict.desc = t.desc
 	end
-	-- TODO: I dont want this to show all the time
 	taskdict["%"] = math.floor(getPercentageDone(t, date) * 100)
 	taskdict.date = t.date
 	return taskdict
 end
 
-local function shortDictPrint(t)
-	print(string.format("[%3d%%] %-30s assigned: %-20s due: %s", t["%"], t.name, t.assigned, t.due or "N/A"))
+local function shortDictPrint(dict)
+	for _, t in ipairs(dict) do
+		print(string.format("[%3d%%] %-30s assigned: %-20s due: %s", t["%"], t.name, t.assigned, t.due or "N/A"))
+	end
+end
+
+local function doneTaskPrint(dict, date)
+	for _, t in ipairs(dict) do
+		print(string.format("%-30s done: %-21s assigned: %-20s", t.name, timedeltatostr(t.done - date), t.date))
+	end
 end
 -- ─── Task creation ────────────────────────────────────────────────────────────
 
@@ -72,6 +77,8 @@ local function createTask(task, date, repeats)
 	return {
 		name = task.name(date, repeats),
 		date = datetoint(date),
+		finish = task.finishdelta(date),
+		show = task.showdelta(date),
 		desc = task.description(date),
 		due = datetoint(task.duetime(date)),
 		prio = task.importance(date),
@@ -80,19 +87,22 @@ local function createTask(task, date, repeats)
 	}
 end
 
--- TODO: i just had the best fucking idea ever, how about instead of parsing into done
--- I make it create another json, donetasks.json, with donetasks but in proper format
--- so i dont have to kill myself again and again
 local function getAllUndone(tasks, done)
 	done = done or {}
 	local donetasks = {}
 	for _, d in ipairs(done) do
 		donetasks[d.name] = donetasks[d.name] or {}
-		donetasks[d.name][d.date] = true
+		if donetasks[d.name][d.date] then
+			donetasks[d.name][d.date] = 1 + donetasks[d.name][d.date]
+		else
+			donetasks[d.name][d.date] = 1
+		end
 	end
 	local undone = {}
 	for _, i in ipairs(tasks) do
-		if not (donetasks[i.name] and donetasks[i.name][i.date]) then
+		if donetasks[i.name] and donetasks[i.name][i.date] > 0 then
+			donetasks[i.name][i.date] = donetasks[i.name][i.date] - 1
+		else
 			table.insert(undone, i)
 		end
 	end
@@ -102,20 +112,37 @@ end
 local function getAllDue(date, tasks)
 	local due = {}
 	for _, value in ipairs(tasks) do
-		if value.date <= datetoint(date) then
+		if inttodate(value.date) - value.show <= date then
 			table.insert(due, value)
 		end
 	end
 	return due
 end
 
--- TODO: implement lookahead/foresight, and make things not disappear or whatever
-local function getToDo(date, tasks, done)
-	return getAllUndone(getAllDue(date, tasks), done)
+local function getUnfinished(date, tasks) -- this function for sure works btw i checked
+	local unfinished = {}
+	for _, value in ipairs(tasks) do
+		if inttodate(value.due) + value.finish >= date or (value.finish == 0) then
+			table.insert(unfinished, value)
+		end
+	end
+	return unfinished
 end
 
-local function getAllTodo(date) -- TODO: print all even not done
-	-- pass
+-- TODO: implement lookahead/foresight, and make things not disappear or whatever
+local function getToDo(date, tasks, done)
+	return getUnfinished(date, getAllUndone(getAllDue(date, tasks), done))
+	-- return getAllUndone(getUnfinished(date, getAllDue(date, tasks)), done)
+end
+
+local function getDoneToday(date, done)
+	local donetoday = {}
+	for _, value in ipairs(done) do
+		if date - 86400 <= value["done"] then
+			table.insert(donetoday, value)
+		end
+	end
+	return donetoday
 end
 
 local function getUpcoming(date)
@@ -123,10 +150,6 @@ local function getUpcoming(date)
 end
 
 local function getAll()
-	-- pass
-end
-
-local function getAllDoneToday() -- could make this function be implemented in get all done
 	-- pass
 end
 
@@ -200,4 +223,7 @@ return {
 	getDoneToFullTasks = getDoneToFullTasks,
 	getAllDue = getAllDue,
 	shortDictPrint = shortDictPrint,
+	getUnfinished = getUnfinished,
+	getDoneToday = getDoneToday,
+	doneTaskPrint = doneTaskPrint,
 }

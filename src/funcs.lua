@@ -114,7 +114,7 @@ local function hour(date)
 end
 
 local function dayofweek(date)
-	return (os.date("*t", date).wday - 2) % 7
+	return (os.date("*t", date).wday - 2)
 end
 
 local function absweek(date)
@@ -133,6 +133,10 @@ end
 
 local function month(date)
 	return os.date("*t", date).month
+end
+
+local function day(date)
+	return date/86400
 end
 
 local function weekofmonth(date)
@@ -206,4 +210,5 @@ return {
 	ispublicholiday = ispublicholiday,
 	ifhelper = ifhelper,
 	spread = spread,
+	day = day,
 }
