@@ -42,7 +42,6 @@ luafiles = tablex.map(function(x)
 	return no_ext:gsub("[/\\]", ".")
 end, luafiles)
 
-print_r(luafiles)
 local function fileToTasks(file)
 	local t = {}
 	local function f(result, tasks) -- This is so fucking stupid
@@ -61,7 +60,6 @@ local function fileToTasks(file)
 end
 local modeltasks = {}
 for _, value in ipairs(luafiles) do -- TODO: fuycking imperitive programming
-	print(value)
 	for _, task in ipairs(fileToTasks(require(value))) do
 
 		table.insert(modeltasks, task)
