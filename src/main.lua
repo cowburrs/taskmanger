@@ -6,8 +6,8 @@ local src = debug.getinfo(1, "S").source:match("^@(.+/)[^/]+$") or "./"
 lfs.chdir(src .. "/..")
 src = lfs.currentdir()
 
-local controller = require("src/controller")
-local model = require("src/model")
+local controller = require("src.controller")
+local model = require("src.model")
 
 local function writefile(file, table)
 	local tf = io.open(file, "w")
@@ -27,8 +27,6 @@ local function openfile(file)
 		return {}
 	end
 end
--- TODO: its in json file format, i could theoretically at least format the strings
--- or even make a gui for it
 
 local date = os.time()
 
@@ -44,7 +42,7 @@ end, luafiles)
 
 local function fileToTasks(file)
 	local t = {}
-	local function f(result, tasks) -- This is so fucking stupid
+	local function f(result, tasks) -- This is so fucking stupid all for functional programming
 		for _, value in ipairs(tasks) do
 			if type(value) == "table" then
 				if value.name then
@@ -61,13 +59,12 @@ end
 local modeltasks = {}
 for _, value in ipairs(luafiles) do -- TODO: fuycking imperitive programming
 	for _, task in ipairs(fileToTasks(require(value))) do
-
+		task.category = model.just(value)
 		table.insert(modeltasks, task)
-		
 	end
 end
 
-local tasks = controller.getTasks(modeltasks)
+local tasks = controller.getTasks(modeltasks, date)
 local donefile = openfile("done.json")
 local done = {}
 for _, value in ipairs(donefile) do

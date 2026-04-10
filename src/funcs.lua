@@ -77,6 +77,14 @@ local function datetoint(date, timed)
 	return tonumber(os.date("%Y%m%d%H%M", date + timed))
 end
 
+local function floorToDay(t)
+    local d = os.date("*t", t)
+    d.hour = 0
+    d.min = 0
+    d.sec = 0
+    return os.time(d)
+end
+
 local function inttodate(n)
 	local s = tostring(n)
 	local year = tonumber(s:sub(1, 4))
@@ -136,7 +144,7 @@ local function month(date)
 end
 
 local function day(date)
-	return date/86400
+	return date / 86400
 end
 
 local function weekofmonth(date)
@@ -188,6 +196,21 @@ local function ifhelper(a, b, c)
 	end
 end
 
+local function getNumSkipTable(num, tab)
+	local skiptable = {}
+	for _, value in ipairs(tab) do
+		skiptable[value] = true
+	end
+	local result = 0
+	for _ = 1, num, 1 do
+		result = result + 1
+		while skiptable[result] do
+			result = result + 1
+		end
+	end
+	return result
+end
+
 -- ─── Exports ──────────────────────────────────────────────────────────────────
 
 return {
@@ -211,4 +234,6 @@ return {
 	ifhelper = ifhelper,
 	spread = spread,
 	day = day,
+	getNumSkipTable = getNumSkipTable,
+	floorToDay = floorToDay
 }

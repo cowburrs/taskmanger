@@ -73,7 +73,7 @@ local function doneTaskPrint(dict, date)
 end
 -- ─── Task creation ────────────────────────────────────────────────────────────
 
-local function createTask(task, date, repeats)
+local function createTask(task, date, repeats, hashfunc)
 	return {
 		name = task.name(date, repeats),
 		date = datetoint(date),
@@ -81,8 +81,9 @@ local function createTask(task, date, repeats)
 		show = task.showdelta(date),
 		desc = task.description(date),
 		due = datetoint(task.duetime(date)),
-		prio = task.importance(date),
-		ver = task.version(date),
+		type = task.category(date),
+		hash = tostring(hashfunc),
+		consec = task.consecutive(date),
 		num = repeats,
 	}
 end
@@ -92,20 +93,35 @@ local function getAllUndone(tasks, done)
 	local donetasks = {}
 	for _, d in ipairs(done) do
 		donetasks[d.name] = donetasks[d.name] or {}
-		if donetasks[d.name][d.date] then
-			donetasks[d.name][d.date] = 1 + donetasks[d.name][d.date]
-		else
-			donetasks[d.name][d.date] = 1
-		end
+		donetasks[d.name][d.date] = donetasks[d.name][d.date] or {}
+		table.insert(donetasks[d.name][d.date], d.done)
 	end
+
 	local undone = {}
 	for _, i in ipairs(tasks) do
-		if donetasks[i.name] and donetasks[i.name][i.date] > 0 then
-			donetasks[i.name][i.date] = donetasks[i.name][i.date] - 1
+		if donetasks[i.name] and donetasks[i.name][i.date] then
+			local found = false
+			for _, value in ipairs(donetasks[i.name][i.date]) do
+				if i.finish >= 0 then
+					if value >= funcs.inttodate(i.date) and value <= funcs.inttodate(i.due) + i.finish then
+						found = true
+						break
+					end
+				else
+					if value >= funcs.inttodate(i.date) then
+						found = true
+						break
+					end
+				end
+			end
+			if not found then
+				table.insert(undone, i)
+			end
 		else
 			table.insert(undone, i)
 		end
 	end
+
 	return undone
 end
 
@@ -122,23 +138,54 @@ end
 local function getUnfinished(date, tasks) -- this function for sure works btw i checked
 	local unfinished = {}
 	for _, value in ipairs(tasks) do
-		if inttodate(value.due) + value.finish >= date or (value.finish == 0) then
+		if inttodate(value.due) + value.finish >= date or (value.finish < 0) then
 			table.insert(unfinished, value)
 		end
 	end
 	return unfinished
 end
 
--- TODO: implement lookahead/foresight, and make things not disappear or whatever
+local function getCategory(tasks, Category)
+	local catlist = {}
+	for _, value in ipairs(tasks) do
+		if value.type == Category then
+			table.insert(catlist, value)
+		end
+	end
+	return catlist
+end
+
+local function getUnconsecutive(tasks)
+	local tablex = require("pl.tablex")
+	local conlist = tablex.filter(tasks, function(task)
+		return task.consec
+	end)
+	local unconlist = tablex.filter(tasks, function(task)
+		return not task.consec
+	end)
+	for _, task1 in ipairs(conlist) do
+		if
+			not tablex.find_if(tasks, function(task2)
+				return task1.date > task2.date and task1.hash == task2.hash
+			end)
+		then
+			table.insert(unconlist, task1)
+		end
+	end
+	return unconlist
+end
+
 local function getToDo(date, tasks, done)
-	return getUnfinished(date, getAllUndone(getAllDue(date, tasks), done))
+	local result = getUnfinished(date, getAllUndone(getAllDue(date, tasks), done))
+	return getUnconsecutive(result)
+	-- return getCategory(getUnconsecutive(result), "tasks.test")
 	-- return getAllUndone(getUnfinished(date, getAllDue(date, tasks)), done)
 end
 
 local function getDoneToday(date, done)
 	local donetoday = {}
 	for _, value in ipairs(done) do
-		if date - 86400 <= value["done"] then
+		if date - 86400 <= value["done"] and date >= value["done"] then
 			table.insert(donetoday, value)
 		end
 	end
@@ -159,17 +206,13 @@ end
 
 -- ─── Evaluation ───────────────────────────────────────────────────────────────
 
-local function evaluate(task)
+local function evaluate(task, date)
 	local taskdicts = {}
-	local check = task.checkstart()
+	local check = task.checkstart(date)
 	local checkend = task.checkend(check)
 	local checkrepeats = task.checkrepeats(check, -1)
 	local repeats = 0
-
-	if #task.conditions == 0 then
-		table.insert(taskdicts, createTask(task, check, repeats))
-		return taskdicts
-	end
+	local hashfunc = {}
 
 	while checkend >= check and checkrepeats ~= 0 do
 		local all = true
@@ -180,7 +223,7 @@ local function evaluate(task)
 			end
 		end
 		if all then
-			table.insert(taskdicts, createTask(task, check, repeats))
+			table.insert(taskdicts, createTask(task, check, repeats, hashfunc))
 			checkrepeats = task.checkrepeats(check, checkrepeats)
 			repeats = repeats + 1
 		end
@@ -190,11 +233,11 @@ local function evaluate(task)
 	return taskdicts
 end
 
-local function getTasks(tasks)
+local function getTasks(tasks, date)
 	tasks = tasks or {}
 	local tasklist = {}
-	for _, task in ipairs(tasks) do
-		local evaluated = evaluate(task)
+	for _, task in ipairs(tasks, date) do
+		local evaluated = evaluate(task, date)
 		for _, t in ipairs(evaluated) do
 			table.insert(tasklist, t)
 		end
@@ -226,4 +269,6 @@ return {
 	getUnfinished = getUnfinished,
 	getDoneToday = getDoneToday,
 	doneTaskPrint = doneTaskPrint,
+	getUnconsecutive = getUnconsecutive,
+	getCategory = getCategory,
 }

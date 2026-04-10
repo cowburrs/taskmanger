@@ -127,18 +127,17 @@ end
 
 -- ─── Task ─────────────────────────────────────────────────────────────────────
 
--- TODO: I think all not check functions deserve n, the number of times it is, or has shown up i mean
 local function Task(opts)
 	assert(opts.name, "Task requires a name")
 	return {
-		name = opts.name, 
+		name = opts.name,
 		conditions = opts.conditions or {},
 		description = opts.description or just(""),
 		duetime = opts.duetime or dueTimeDefault(), -- 0 means never due
-		finishdelta = opts.finishdelta or just(timedelta()),
+		finishdelta = opts.finishdelta or just(timedelta(-1)), -- how long after it should show
 		showdelta = opts.showdelta or just(timedelta(1)),
-		importance = opts.importance or just(0),
-		version = opts.version or just(0),
+		category = opts.category or just(""),
+		consecutive = opts.consecutive or just(false),
 		checkstart = opts.checkstart or just(dt(2000, 1, 1)),
 		checkend = opts.checkend or checkEndDefault(),
 		checkstep = opts.checkstep or just(DAY), -- time between each check, so like daily or hourly, minutely is possible. secondly not implementable though can be thought of as dt
@@ -174,7 +173,7 @@ end
 
 local function lectureTask(Subject, Letter, Week, WeekDay, Start, Repeats)
 	return {
-		name = function(date, n)
+		name = function(_, n)
 			return Subject:sub(1, 1):upper() .. Subject:sub(2) .. " Week " .. (n + Week) .. " Lec" .. Letter:upper()
 		end,
 		conditions = { isDayOfWeek(WeekDay), isNotTeachingBreak() },
@@ -183,9 +182,19 @@ local function lectureTask(Subject, Letter, Week, WeekDay, Start, Repeats)
 		checkrepeats = justRepeats(Repeats),
 	}
 end
--- local function subjectWeeklyTask()
--- end
 
+local function weeklyTask(name)
+	return {
+		name = just(name),
+		conditions = { isDayOfWeek(0) },
+		duetime = dueTime(timedelta(7)),
+		checkstart = function(date)
+			return funcs.floorToDay(date) - timedelta(7)
+		end,
+		checkrepeats = justRepeats(2),
+		finishdelta = just(timedelta(0)),
+	}
+end
 
 local function lectureTasks(Subject, Repeats, Sessions, Week)
 	Week = Week or 0
@@ -218,25 +227,23 @@ local function quizTask(subject, name, checkstart, duetime, repeats, startnum)
 	}
 end
 
+local function worksheetTasks(bookname, start, delta, repeats, skiplist)
+	return {
+		name = function(_, n)
+			return bookname .. " Chapter " .. funcs.getNumSkipTable(n + 1, skiplist)
+		end,
+		conditions = { just(true) },
+		checkstart = just(start),
+		checkrepeats = justRepeats(repeats),
+		checkstep = just(delta),
+		consecutive = just(true),
+	}
+end
+
 -- ─── Tasks list ───────────────────────────────────────────────────────────────
 
--- TODO: put all the fucking stupid functions and class dataclass above in a separate file
--- TODO: Make this final bit modular and i have a working prototype
--- TODO: I think checkstep could be what i use
--- TODO: now just lambda calculus worksheets
--- and just index into it based on how many times repeated, like []
--- TODO: I should make constructors for tasks, like currying so that i dont have to specify everything, for example lecture tasks are like 3 days due date and stuff(or no due date if i decide to change in the future)
 -- TODO: I could use gum in my cli tool, like as in to like 'you want to change add to todo' or as in like a 'do you wish to gitshit'
--- TODO: I could incorporate gum cli prettier tool to ask like yes no do i want to gitshit and yes no do i want to go back and change/add more things
 -- Or i could make it that when you do exit, it checks if done has been changed, and auto git add commits that. that sounds smart
--- print(dump(luafiles))
--- local school = require("tasks.school")
-
-
--- TODO: I could make a schoolweek function, so that the names can be done better, an n function curry is what i mean to remove the date cause its bloat at the end of the day
--- TODO: wait i just remember what i was thinking, like schoolweek function for the name, like week - number of schoolweeks had, not currying
-
--- TODO: Names need to be done better just straight up
 
 return {
 	DAY = DAY,
@@ -266,4 +273,7 @@ return {
 	lectureTasks = lectureTasks,
 	singleTasks = singleTasks,
 	quizTask = quizTask,
+	worksheetTasks = worksheetTasks,
+	weeklyTask = weeklyTask,
+	justReturn = justReturn,
 }
