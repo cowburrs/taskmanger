@@ -56,13 +56,17 @@ local function fileToTasks(file)
 	f(t, file)
 	return t
 end
-local modeltasks = {}
-for _, value in ipairs(luafiles) do -- TODO: fuycking imperitive programming
-	for _, task in ipairs(fileToTasks(require(value))) do
-		task.category = model.just(value)
-		table.insert(modeltasks, task)
+local function filesToTasks(files)
+	local tasks = {}
+	for _, value in ipairs(files) do -- TODO: fuycking imperitive programming
+		for _, task in ipairs(fileToTasks(require(value))) do
+			task.category = model.just(value)
+			table.insert(tasks, task)
+		end
 	end
+	return tasks
 end
+local modeltasks = filesToTasks(luafiles)
 
 local tasks = controller.getTasks(modeltasks, date)
 local donefile = openfile("done.json")
