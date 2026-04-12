@@ -14,7 +14,7 @@ src = src and (src:match("^(.+)[/\\][^/\\]+$") or ".") or "."
 lfs.chdir(src)
 
 local function exit(func)
-	local handle = io.popen("gum choose 'Nvim' 'Quit (Commit)' 'Viddy' 'Quit (Dry)' 'Change Time' 'Wait' 'Edit Tasks'")
+	local handle = io.popen("gum choose 'Nvim' 'Quit (Commit)' 'Viddy' 'Quit (Dry)' 'Change Time' 'Wait'")
 	if handle then
 		local choice = handle:read("*a"):gsub("\n", "")
 		handle:close()
@@ -57,9 +57,6 @@ local function exit(func)
 		if choice == "Wait" then
 			superWait()
 			exit(func)
-		end
-		if choice == "Edit Tasks" then
-			lfs.chdir("../")
 		end
 	end
 end
