@@ -25,6 +25,7 @@ return {
 		"vpython nix",
 		"Go through emails",
 		"gum cli addage to todo",
+		"Go through all todo in taskmanger",
 	}),
 	wt("shave"),
 	wt("clean"),
