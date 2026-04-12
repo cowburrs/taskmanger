@@ -6,6 +6,12 @@ local function superWait()
 		os.execute("gum spin -s " .. value .. " --title 'Loading...' -- sleep 1")
 	end
 end
+
+local function run(label, cmd, type)
+	type = type or "dot"
+	return os.execute("gum spin --spinner " .. type .. " --title '" .. label .. "' -- " .. cmd)
+end
+
 local lfs = require("lfs")
 arg[1] = arg[1] or 5
 
@@ -14,7 +20,7 @@ src = src and (src:match("^(.+)[/\\][^/\\]+$") or ".") or "."
 lfs.chdir(src)
 
 local function exit(func)
-	local handle = io.popen("gum choose 'Nvim' 'Quit (Commit)' 'Viddy' 'Quit (Dry)' 'Change Time' 'Wait'")
+	local handle = io.popen("gum choose 'Nvim' 'Quit (Commit)' 'Viddy' 'Quit (Dry)' 'Change Time' 'Edit Tasks'")
 	if handle then
 		local choice = handle:read("*a"):gsub("\n", "")
 		handle:close()
@@ -54,9 +60,25 @@ local function exit(func)
 			end
 			func()
 		end
-		if choice == "Wait" then
-			superWait()
-			exit(func)
+		if choice == "Edit Tasks" then
+			os.execute("nvim ../tasks/")
+			if
+				not os.execute("git diff --quiet HEAD ../tasks/")
+				and os.execute("gum confirm 'Do you wish to Commit and Push?'")
+			then
+				os.execute("git restore --staged :/")
+				os.execute("git add ../tasks/")
+				os.execute("git commit -m 'feat: changed tasks'")
+				os.execute("clear")
+				if run("Pushing...", "git push", "pulse") then
+					exit(func)
+				else
+					print("Push Failed")
+					os.exit(1)
+				end
+			else
+				exit(func)
+			end
 		end
 	end
 end
