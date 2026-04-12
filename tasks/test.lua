@@ -1,8 +1,5 @@
 local m = require("src.model")
 local st = m.singleTasks
-local weeklyTask = m.weeklyTask
-local dt = m.dt
-local timedelta = m.timedelta
 local wt = m.weeklyTask
 return {
 	st({
@@ -26,8 +23,10 @@ return {
 		"Proportional derivative controller engn",
 		"vpython nix",
 		"Go through emails",
+		"gum cli addage to todo",
 	}),
 	wt("shave"),
 	wt("check emails"),
 	wt("cut nails"),
+	wt("clear tabs"),
 }

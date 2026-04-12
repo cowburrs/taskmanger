@@ -46,7 +46,7 @@ end
 
 -- TODO: I could also make it so that it takes an input, a list of time when i'm busy, or something
 -- And tell me how many hours i have left to work on something
-local function taskDictShorten(t, date)
+local function taskDictReadable(t, date)
 	local taskdict = {
 		name = t.name,
 		due = getDue(t, date),
@@ -192,17 +192,17 @@ local function getDoneToday(date, done)
 	return donetoday
 end
 
-local function getUpcoming(date)
-	-- pass
+local function getUpcoming(date, tasks) -- NOTE: I don't know if this function works
+	local upcoming = {}
+	for _, value in ipairs(tasks) do
+		if date <= value["due"] then
+			table.insert(upcoming, value)
+		end
+	end
+	return upcoming
 end
 
-local function getAll()
-	-- pass
-end
-
-local function getDoneToFullTasks() -- could make this function be implemented in get all done
-	-- pass
-end
+local function getAll() end
 
 -- ─── Evaluation ───────────────────────────────────────────────────────────────
 
@@ -252,17 +252,14 @@ return {
 	getAssigned = getAssigned,
 	getPercentageDone = getPercentageDone,
 	sortByDue = sortByDue,
-	taskDictShorten = taskDictShorten,
+	taskDictReadable = taskDictReadable,
 	createTask = createTask,
 	getToDo = getToDo,
 	getTasks = getTasks,
 	evaluate = evaluate,
 	getAllUndone = getAllUndone,
-	getAllTodo = getAllTodo,
 	getUpcoming = getUpcoming,
 	getAll = getAll,
-	-- getAllDone = getAllDone,
-	getAllDoneToday = getAllDoneToday,
 	getDoneToFullTasks = getDoneToFullTasks,
 	getAllDue = getAllDue,
 	shortDictPrint = shortDictPrint,

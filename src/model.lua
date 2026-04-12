@@ -135,7 +135,7 @@ local function Task(opts)
 		description = opts.description or just(""),
 		duetime = opts.duetime or dueTimeDefault(), -- 0 means never due
 		finishdelta = opts.finishdelta or just(timedelta(-1)), -- how long after it should show
-		showdelta = opts.showdelta or just(timedelta(1)),
+		showdelta = opts.showdelta or just(timedelta(0)),
 		category = opts.category or just(""),
 		consecutive = opts.consecutive or just(false),
 		checkstart = opts.checkstart or just(dt(2000, 1, 1)),
