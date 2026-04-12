@@ -125,6 +125,8 @@ print("-| Done Today |-")
 doneTaskPrint(controller.getDoneToday(date, done), date)
 local todofile = toCopyDict(shortened, date)
 
+-- TODO: I should lock these behind arg so i dont have to fucking run these every time and use
+-- All of my ssd utilization
 writefile("json/todo.json", todofile)
 writefile("json/tasks.json", tasks)
 -- tf:write(json.encode(shortened))
