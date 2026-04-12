@@ -1,5 +1,4 @@
 local m = require("src.model")
-
 local DAY = m.DAY
 local HOUR = m.HOUR
 local MIN = m.MIN
