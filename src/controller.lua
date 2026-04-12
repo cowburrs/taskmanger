@@ -60,17 +60,6 @@ local function taskDictReadable(t, date)
 	return taskdict
 end
 
-local function shortDictPrint(dict)
-	for _, t in ipairs(dict) do
-		print(string.format("[%3d%%] %-30s assigned: %-20s due: %s", t["%"], t.name, t.assigned, t.due or "N/A"))
-	end
-end
-
-local function doneTaskPrint(dict, date)
-	for _, t in ipairs(dict) do
-		print(string.format("%-30s done: %-21s assigned: %-20s", t.name, timedeltatostr(t.done - date), t.date))
-	end
-end
 -- ─── Task creation ────────────────────────────────────────────────────────────
 
 local function createTask(task, date, repeats, hashfunc)
@@ -260,12 +249,9 @@ return {
 	getAllUndone = getAllUndone,
 	getUpcoming = getUpcoming,
 	getAll = getAll,
-	getDoneToFullTasks = getDoneToFullTasks,
 	getAllDue = getAllDue,
-	shortDictPrint = shortDictPrint,
 	getUnfinished = getUnfinished,
 	getDoneToday = getDoneToday,
-	doneTaskPrint = doneTaskPrint,
 	getUnconsecutive = getUnconsecutive,
 	getCategory = getCategory,
 }

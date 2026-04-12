@@ -9,6 +9,7 @@ src = lfs.currentdir()
 
 local controller = require("src.controller")
 local model = require("src.model")
+local funcs = require("src.funcs")
 
 local function writefile(file, table)
 	local tf = io.open(file, "w")
@@ -29,7 +30,7 @@ local function openfile(file)
 	end
 end
 
-local function fileToTasks(file)
+local function moduleToTask(file)
 	local t = {}
 	local function f(result, tasks) -- This is so fucking stupid all for functional programming
 		for _, value in ipairs(tasks) do
@@ -46,10 +47,10 @@ local function fileToTasks(file)
 	return t
 end
 
-local function filesToTasks(files)
+local function modulesToTasks(files)
 	local tasks = {}
 	for _, value in ipairs(files) do
-		for _, task in ipairs(fileToTasks(require(value))) do
+		for _, task in ipairs(moduleToTask(require(value))) do
 			task.category = model.just(value)
 			table.insert(tasks, task)
 		end
@@ -87,33 +88,43 @@ local function tasksToReadables(tasks, date)
 	return readables
 end
 
+local function shortDictPrint(dict)
+	for _, t in ipairs(dict) do
+		print(string.format("[%3d%%] %-30s assigned: %-20s due: %s", t["%"], t.name, t.assigned, t.due or "N/A"))
+	end
+end
+
+local function doneTaskPrint(dict, date)
+	for _, t in ipairs(dict) do
+		print(string.format("%-30s done: %-21s assigned: %-20s", t.name, funcs.timedeltatostr(t.done - date), t.date))
+	end
+end
+
+local function toCopyDict(shortened, date)
+	local copyable = {}
+	local shortenedCopy = { table.unpack(shortened) } -- WARNING: shallow copy
+	table.insert(shortenedCopy, { name = "End of Todo", date = 0 })
+	for _, value in ipairs(shortenedCopy) do
+		table.insert(copyable, { value["name"], value["date"], date })
+	end
+	return copyable
+end
+
 local date = os.time()
-
 local dir = require("pl.dir")
-
 local luafiles = dir.getallfiles("tasks", "*.lua")
 local modules = filesToModules(luafiles)
-
-local modeltasks = filesToTasks(modules)
-
+local modeltasks = modulesToTasks(modules)
 local tasks = controller.getTasks(modeltasks, date)
 local done = taskShorten(openfile("done.json"))
-
 local todo = controller.sortByDue(controller.getToDo(date, tasks, done))
-
 local shortened = tasksToReadables(todo, date)
-
-controller.shortDictPrint(shortened)
-
+shortDictPrint(shortened)
 print()
 print("-| Done Today |-")
-controller.doneTaskPrint(controller.getDoneToday(date, done), date)
+doneTaskPrint(controller.getDoneToday(date, done), date)
+local todofile = toCopyDict(shortened, date)
 
-table.insert(shortened, { name = "End of Todo", date = 0 })
-local todofile = {}
-for _, value in ipairs(shortened) do
-	table.insert(todofile, { value["name"], value["date"], date })
-end
 writefile("json/todo.json", todofile)
 writefile("json/tasks.json", tasks)
 -- tf:write(json.encode(shortened))

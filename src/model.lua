@@ -65,6 +65,13 @@ local function isDayOfWeek(day)
 	end
 end
 
+local function isWeekOfMonth(week, tdelta)
+	tdelta = tdelta or 0
+	return function(date)
+		return funcs.weekofmonth(date + tdelta) == week
+	end
+end
+
 -- ─── Core helpers ─────────────────────────────────────────────────────────────
 
 local function just(x) -- ITS A FUCKING POLYMORPHIC FUNCTION XDDDDDDDDDDDDDDDDDDDDDDD
@@ -275,5 +282,5 @@ return {
 	quizTask = quizTask,
 	worksheetTasks = worksheetTasks,
 	weeklyTask = weeklyTask,
-	justReturn = justReturn,
+	isWeekOfMonth = isWeekOfMonth,
 }
