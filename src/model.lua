@@ -247,6 +247,17 @@ local function worksheetTasks(bookname, start, delta, repeats, skiplist)
 	}
 end
 
+local function consecutiveTask(name, repeats)
+	return {
+		name = function(_, n)
+			return name .. " " .. (n + 1)
+		end,
+		checkrepeats = justRepeats(repeats),
+		checkstep = just(0),
+		consecutive = just(true),
+	}
+end
+
 -- ─── Tasks list ───────────────────────────────────────────────────────────────
 
 -- TODO: I could use gum in my cli tool, like as in to like 'you want to change add to todo' or as in like a 'do you wish to gitshit'
@@ -283,4 +294,5 @@ return {
 	worksheetTasks = worksheetTasks,
 	weeklyTask = weeklyTask,
 	isWeekOfMonth = isWeekOfMonth,
+	consecutiveTask = consecutiveTask,
 }

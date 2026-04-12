@@ -10,11 +10,11 @@ local lfs = require("lfs")
 arg[1] = arg[1] or 5
 
 local src = debug.getinfo(1, "S").source:match("^@(.+)$")
-src = src:match("^(.+)[/\\][^/\\]+$")
+src = src and (src:match("^(.+)[/\\][^/\\]+$") or ".") or "."
 lfs.chdir(src)
 
 local function exit(func)
-	local handle = io.popen("gum choose 'Nvim' 'Quit (Commit)' 'Viddy' 'Quit (Dry)' 'Change Time' 'Wait'")
+	local handle = io.popen("gum choose 'Nvim' 'Quit (Commit)' 'Viddy' 'Quit (Dry)' 'Change Time' 'Wait' 'Edit Tasks'")
 	if handle then
 		local choice = handle:read("*a"):gsub("\n", "")
 		handle:close()
@@ -58,6 +58,9 @@ local function exit(func)
 			superWait()
 			exit(func)
 		end
+		if choice == "Edit Tasks" then
+			lfs.chdir("../")
+		end
 	end
 end
 local function doTodo()
@@ -67,6 +70,7 @@ local function doTodo()
 end
 doTodo()
 -- NOTE: this code is handling what it would look like to add a line to todo without nvim
+-- os.execute("prettier --write ../*json >/dev/null")
 -- local handle = io.popen("cat ../json/todo.json | head -n -2 | tail -n +2 | gum filter")
 -- if handle then
 -- 	local choice = handle:read("*a"):gsub("\n", "")

@@ -104,7 +104,7 @@ local returntable = {
 		"debloat computer",
 		"shellnix/devenvs",
 	}),
-	worksheetTasks("Lambda Calculus", dt(2025, 4, 4), timedelta(1), 8, {4, 6, 10})
+	worksheetTasks("Lambda Calculus", dt(2026, 4, 4), timedelta(5), 8, {4, 6, 10})
 	-- textBookTasks("Jstweart", dt(2026, 4, 4), dt(2026, 5, 4), { 6, 8, 7, 5, 8, 6, 7, 8, 5, 9, 8, 8, 9 }),
 }
 

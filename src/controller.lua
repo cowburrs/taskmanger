@@ -155,7 +155,7 @@ local function getUnconsecutive(tasks)
 	for _, task1 in ipairs(conlist) do
 		if
 			not tablex.find_if(tasks, function(task2)
-				return task1.date > task2.date and task1.hash == task2.hash
+				return task1.num > task2.num and task1.hash == task2.hash
 			end)
 		then
 			table.insert(unconlist, task1)
