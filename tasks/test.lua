@@ -28,6 +28,7 @@ return {
 		"Go through all todo in taskmanger",
 		"bsides/csides canberra",
 		"Ctrl Backspace nvim",
+		"get logseq todo in this",
 	}),
 	wt("shave"),
 	wt("clean"),
