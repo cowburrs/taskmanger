@@ -9,6 +9,7 @@ return {
 	wt("cut nails"),
 	wt("clear tabs"),
 	wt("nix flake update"),
+	wt("clean toothbrush"),
 	{
 		name = m.just("Humble Bundle"),
 		conditions = { m.isDayOfWeek(2), m.isWeekOfMonth(1, m.timedelta(0, -17)) },
