@@ -64,5 +64,7 @@ return {
 		"accumulate tasks (check notes)",
 		"home manager (replace stow)",
 		"task manager rss feeds",
+		"debloat computer",
+		"shellnix/devenvs",
 	}),
 }
