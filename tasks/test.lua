@@ -50,5 +50,11 @@ return {
 		"get logseq todo in this",
 		"message tax file number and supperannuation",
 		"pullup tower",
+		"task manager flake (check notes)",
+		"make/add scripts folder (check notes)",
+		"connect tasks to notes logseq",
+		"Find a way to use old numbers/uni psw",
+		"android text writing app instead of firefox",
+		"turn task manager into flake",
 	}),
 }
