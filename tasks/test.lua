@@ -66,5 +66,6 @@ return {
 		"task manager rss feeds",
 		"debloat computer",
 		"shellnix/devenvs",
+		"gitignore vesktop and fonts",
 	}),
 }

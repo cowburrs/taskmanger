@@ -97,7 +97,6 @@ local returntable = {
 		"vpython",
 		"Comp lab 6 folds",
 		"comp 5 final q",
-		"gitignore vesktop and fonts",
 		"make clear tabs task weekly",
 	}),
 	worksheetTasks("Lambda Calculus", dt(2026, 4, 4), timedelta(5), 8, {4, 6, 10})
