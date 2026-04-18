@@ -118,6 +118,9 @@ local modeltasks = modulesToTasks(modules)
 local tasks = controller.getTasks(modeltasks, date)
 local done = taskShorten(openfile("done.json"))
 local todo = controller.sortByDue(controller.getToDo(date, tasks, done))
+if arg[1] then
+	todo = controller.getCategory(todo, arg[1])
+end
 local shortened = tasksToReadables(todo, date)
 shortDictPrint(shortened)
 print()

@@ -13,14 +13,24 @@ local function run(label, cmd, type)
 end
 
 local lfs = require("lfs")
-arg[1] = arg[1] or 5
+local viddytime = 5
+local category = ""
+for index, value in ipairs(arg) do
+	if value == "-t" then
+		viddytime = tonumber(arg[index + 1])
+	end
+	if value == "-c" then
+		category = arg[index + 1]
+	end
+end
 
 local src = debug.getinfo(1, "S").source:match("^@(.+)$")
 src = src and (src:match("^(.+)[/\\][^/\\]+$") or ".") or "."
 lfs.chdir(src)
 
-local function exit(func)
-	local handle = io.popen("gum choose 'Nvim' 'Quit (Commit)' 'Viddy' 'Quit (Dry)' 'Change Time' 'Edit Tasks'")
+local function exit(func) --TODO: this function is getting a lil big
+	local handle =
+		io.popen("gum choose 'Nvim' 'Quit (Commit)' 'Viddy' 'Quit (Dry)' 'Change Time' 'Change Category' 'Edit Tasks'")
 	if handle then
 		local choice = handle:read("*a"):gsub("\n", "")
 		handle:close()
@@ -55,8 +65,16 @@ local function exit(func)
 		if choice == "Change Time" then
 			local time = io.popen("gum input --placeholder 'Enter interval'")
 			if time then
-				arg[1] = time:read("*a"):gsub("\n", "")
+				viddytime = time:read("*a"):gsub("\n", "")
 				time:close()
+			end
+			func()
+		end
+		if choice == "Change Category" then
+			local inpstring = io.popen("gum input --placeholder 'Enter Category'")
+			if inpstring then
+				category = inpstring:read("*a"):gsub("\n", "")
+				inpstring:close()
 			end
 			func()
 		end
@@ -83,7 +101,7 @@ local function exit(func)
 	end
 end
 local function doTodo()
-	os.execute("viddy -n " .. arg[1] .. ' "{ time lua ./view.lua; } 2>&1"')
+	os.execute("viddy -n " .. viddytime .. ' "{ time lua ./view.lua ' .. category .. '; } 2>&1"')
 	os.execute("clear")
 	exit(doTodo)
 end
