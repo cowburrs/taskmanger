@@ -67,6 +67,7 @@ return {
 		"debloat computer",
 		"shellnix/devenvs",
 		"gitignore vesktop and fonts",
-		"wlrwhichkey and submaps for opening apps"
+		"wlrwhichkey and submaps for opening apps",
+		"fuck a dick",
 	}),
 }

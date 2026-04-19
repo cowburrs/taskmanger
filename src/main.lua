@@ -16,6 +16,8 @@ local lfs = require("lfs")
 local viddytime = 5
 local category = ""
 local quick = false
+local configrepo = (os.getenv("XDG_CONFIG_HOME") or (os.getenv("HOME") .. "/.config")) .. "/taskmangr/" -- TODO: changable config repo
+local cacherepo = (os.getenv("XDG_CACHE_HOME") or (os.getenv("HOME") .. "/.cache")) .. "/taskmangr/"
 for index, value in ipairs(arg) do
 	if value == "-t" then
 		viddytime = tonumber(arg[index + 1]) -- TODO: Wrap viddy in a xdg config home, so that I can point the config file somewhere or in my flake i wrap my entire lua script in a xdg config home pointer
@@ -34,18 +36,24 @@ local src = debug.getinfo(1, "S").source:match("^@(.+)$")
 src = src and (src:match("^(.+)[/\\][^/\\]+$") or ".") or "."
 lfs.chdir(src)
 
-local function doNvim()
+local function doNvim() -- TODO: make entire front end configurable, through like init.lua or smth
+	local originaldir = lfs.currentdir()
+	lfs.chdir(cacherepo)
 	os.execute("lua ./view.lua;")
 	os.execute("clear")
-	os.execute("prettier --write ../*json >/dev/null")
-	os.execute("nvim -O ../json/todo.json ../done.json")
+	os.execute("prettier --config ".. originaldir .."/../.prettierrc --write ./*json >/dev/null")
+	os.execute("nvim -O json/todo.json " .. configrepo .. "done.json")
+	lfs.chdir(originaldir)
 end
 
 local function doCantDone()
+	local originaldir = lfs.currentdir()
+	lfs.chdir(cacherepo)
 	os.execute("lua ./view.lua;")
 	os.execute("clear")
-	os.execute("prettier --write ../*json >/dev/null")
-	os.execute("nvim -O ../json/todo.json ../cantdone.json5")
+	os.execute("prettier --config " .. originaldir .. "/../.prettierrc --write ./*json >/dev/null")
+	os.execute("nvim -O json/todo.json " .. configrepo .. "cantdone.json5")
+	lfs.chdir(originaldir)
 end
 
 local function exit(func) --TODO: this function is getting a lil big
@@ -67,17 +75,22 @@ local function exit(func) --TODO: this function is getting a lil big
 			exit(func)
 		end
 		if choice == "Quit (Commit)" then
-			if not os.execute("git diff --quiet HEAD ../done.json") then
+			local originaldir = lfs.currentdir()
+			lfs.chdir(configrepo)
+			if not os.execute("git diff --quiet HEAD done.json") then
 				if os.execute("gum confirm 'Do you really wish to Commit?'") then
 					os.execute("git restore --staged :/")
-					os.execute("git add ../done.json")
-					os.execute("git commit -m 'feat: changed done.json'")
+					os.execute("git add done.json")
+					os.execute('git commit -m "feat: changed done.json"')
 					os.execute("git push")
+					lfs.chdir(originaldir)
 					os.exit(0)
 				else
+					lfs.chdir(originaldir)
 					exit(func)
 				end
 			else
+				lfs.chdir(originaldir)
 				os.exit(0)
 			end
 		end
@@ -101,15 +114,18 @@ local function exit(func) --TODO: this function is getting a lil big
 			func()
 		end
 		if choice == "Edit Tasks" then
-			os.execute("nvim ../tasks/")
+			local originaldir = lfs.currentdir()
+			lfs.chdir(configrepo)
+			os.execute("nvim ./tasks/")
 			if
-				not os.execute("git diff --quiet HEAD ../tasks/")
+				not os.execute("git diff --quiet HEAD ./tasks/")
 				and os.execute("gum confirm 'Do you wish to Commit and Push?'")
 			then
 				os.execute("git restore --staged :/")
-				os.execute("git add ../tasks/")
-				os.execute("git commit -m 'feat: changed tasks'")
+				os.execute("git add ./tasks/")
+				os.execute("git commit -m 'feat: changed ./tasks'")
 				os.execute("clear")
+				lfs.chdir(originaldir)
 				if run("Pushing...", "git push", "pulse") then
 					exit(func)
 				else
@@ -117,6 +133,7 @@ local function exit(func) --TODO: this function is getting a lil big
 					os.exit(1)
 				end
 			else
+				lfs.chdir(originaldir)
 				exit(func)
 			end
 		end

@@ -33,12 +33,22 @@ end
 
 local function sortByDue(tasks)
 	local sorted = {}
+	local epoch2000 = os.time({ year = 2000, month = 1, day = 1, hour = 0, min = 0, sec = 0 })
 	for _, v in ipairs(tasks) do
 		table.insert(sorted, v)
 	end
-	table.sort(sorted, function(a, b)
-		local ad = a.due or math.huge
-		local bd = b.due or math.huge
+	table.sort(sorted, function(a, b) -- TODO: Make this a definable function in .config
+		local ad = a.due
+		local bd = b.due
+		if ad == datetoint(epoch2000)  then
+			ad = math.huge
+		end
+		if bd == datetoint(epoch2000)  then
+			bd = math.huge
+		end
+		if ad == bd then
+			return a.name:lower() < b.name:lower()
+		end
 		return ad < bd
 	end)
 	return sorted

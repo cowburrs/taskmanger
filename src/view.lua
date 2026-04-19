@@ -12,6 +12,7 @@ local model = require("src.model")
 local funcs = require("src.funcs")
 
 local function writefile(file, table)
+	os.execute("mkdir -p " .. file:match("(.*/)"))
 	local tf = io.open(file, "w")
 	if tf then
 		tf:write(json.encode(table))
@@ -29,7 +30,33 @@ local function openfile(file)
 		return {}
 	end
 end
+local function fileToTask(file)
+	local t = {}
+	local function f(result, tasks)
+		for _, value in ipairs(tasks) do
+			if type(value) == "table" then
+				if value.name then
+					table.insert(result, model.Task(value))
+				else
+					f(result, value)
+				end
+			end
+		end
+	end
+	f(t, dofile(file))
+	return t
+end
 
+local function filesToTasks(files)
+	local tasks = {}
+	for _, value in ipairs(files) do
+		for _, task in ipairs(fileToTask(value)) do
+			task.category = model.just(value)
+			table.insert(tasks, task)
+		end
+	end
+	return tasks
+end
 local function moduleToTask(file)
 	local t = {}
 	local function f(result, tasks) -- This is so fucking stupid all for functional programming
@@ -109,15 +136,16 @@ local function toCopyDict(shortened, date)
 	end
 	return copyable
 end
+local cacherepo = (os.getenv("XDG_CACHE_HOME") or (os.getenv("HOME") .. "/.cache")) .. "/taskmangr/"
 
 local date = os.time()
 local dir = require("pl.dir")
-local luafiles = dir.getallfiles("tasks", "*.lua")
-local modules = filesToModules(luafiles)
-local modeltasks = modulesToTasks(modules)
+local configrepo = (os.getenv("XDG_CONFIG_HOME") or (os.getenv("HOME") .. "/.config")) .. "/taskmangr/" -- TODO: Make this a flag to be able to change
+local luafiles = dir.getallfiles(configrepo .. "tasks", "*.lua")
+local modeltasks = filesToTasks(luafiles)
 local tasks = controller.getTasks(modeltasks, date)
-local done = taskShorten(openfile("done.json")) -- TODO: I should use json5 instead for done, its much better, then i don't have to append the stupid end of list
-os.execute("fixjson cantdone.json5 > json/cantdone.json") -- TODO: THIS TAKES 0.04 fucking seconds to run
+local done = taskShorten(openfile(configrepo .. "done.json")) -- TODO: I should use json5 instead for done, its much better, then i don't have to append the stupid end of list
+os.execute("fixjson " .. configrepo .. "cantdone.json5 > " .. cacherepo .. "json/cantdone.json") -- TODO: THIS TAKES 0.04 fucking seconds to run
 for _, value in ipairs(taskShorten(openfile("json/cantdone.json"))) do -- TODO: This is pretty hard coded icl
 	table.insert(done, value)
 end
@@ -134,7 +162,6 @@ local todofile = toCopyDict(shortened, date)
 
 -- TODO: I should lock these behind arg so i dont have to fucking run these every time and use
 -- All of my ssd utilization
-writefile("json/todo.json", todofile)
-writefile("json/tasks.json", tasks)
+writefile(cacherepo .. "json/todo.json", todofile) -- TODO: Writing does not work, since immutability, need to define in .cache
+writefile(cacherepo .. "json/tasks.json", tasks) -- TODO: i dont even need to write, i can pipe to nvim
 -- tf:write(json.encode(shortened))
---
