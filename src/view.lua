@@ -137,6 +137,7 @@ local function toCopyDict(shortened, date)
 	return copyable
 end
 local cacherepo = (os.getenv("XDG_CACHE_HOME") or (os.getenv("HOME") .. "/.cache")) .. "/taskmangr/"
+--TODO: i accidentally did taskmangr instead of taskmanger...
 
 local date = os.time()
 local dir = require("pl.dir")
@@ -164,4 +165,5 @@ local todofile = toCopyDict(shortened, date)
 -- All of my ssd utilization
 writefile(cacherepo .. "json/todo.json", todofile) -- TODO: Writing does not work, since immutability, need to define in .cache
 writefile(cacherepo .. "json/tasks.json", tasks) -- TODO: i dont even need to write, i can pipe to nvim
+--TODO: writing files should be in main
 -- tf:write(json.encode(shortened))

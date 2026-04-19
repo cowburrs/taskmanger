@@ -23,8 +23,9 @@
               penlight
             ]
           ))
-			 pkgs.viddy
-			 pkgs.gum
+          pkgs.viddy
+          pkgs.gum
+			 pkgs.neovim
         ];
 
         text = ''

@@ -178,7 +178,7 @@ local function getUnconsecutive(tasks)
 	return unconlist
 end
 
-local function getAccumalative(tasks)
+local function getAccumalative(tasks) -- TODO: this doesnt fucking work for adding a task cause it appends a stupid ass (+1), 
 	local tablex = require("pl.tablex")
 	local conlist = tablex.filter(tasks, function(task)
 		return task.attrib.accumalative
@@ -207,7 +207,7 @@ end
 
 local function getToDo(date, tasks, done)
 	local result = getUnfinished(date, getAllUndone(getAllDue(date, tasks), done))
-	result = getAccumalative(result)
+	result = getAccumalative(result) -- TODO: This shouldnt be here. cause (+1 makes it not copy pastable)
 	return getUnconsecutive(result)
 	-- return getCategory(getUnconsecutive(result), "tasks.test")
 	-- return getAllUndone(getUnfinished(date, getAllDue(date, tasks)), done)
