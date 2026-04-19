@@ -18,7 +18,7 @@ local category = ""
 local quick = false
 for index, value in ipairs(arg) do
 	if value == "-t" then
-		viddytime = tonumber(arg[index + 1])
+		viddytime = tonumber(arg[index + 1]) -- TODO: Wrap viddy in a xdg config home, so that I can point the config file somewhere or in my flake i wrap my entire lua script in a xdg config home pointer
 	end
 	if value == "-c" then
 		category = arg[index + 1]
