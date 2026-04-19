@@ -117,6 +117,10 @@ local modules = filesToModules(luafiles)
 local modeltasks = modulesToTasks(modules)
 local tasks = controller.getTasks(modeltasks, date)
 local done = taskShorten(openfile("done.json"))
+os.execute("fixjson cantdone.json5 > json/cantdone.json")
+for _, value in ipairs(taskShorten(openfile("json/cantdone.json"))) do
+	table.insert(done, value)
+end
 local todo = controller.sortByDue(controller.getToDo(date, tasks, done))
 if arg[1] then
 	todo = controller.getCategory(todo, arg[1])

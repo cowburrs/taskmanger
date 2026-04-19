@@ -15,6 +15,7 @@ end
 local lfs = require("lfs")
 local viddytime = 5
 local category = ""
+local quick = false
 for index, value in ipairs(arg) do
 	if value == "-t" then
 		viddytime = tonumber(arg[index + 1])
@@ -22,26 +23,47 @@ for index, value in ipairs(arg) do
 	if value == "-c" then
 		category = arg[index + 1]
 	end
+	if value == "-q" then
+		if arg[index + 1] then
+			quick = true
+		end
+	end
 end
 
 local src = debug.getinfo(1, "S").source:match("^@(.+)$")
 src = src and (src:match("^(.+)[/\\][^/\\]+$") or ".") or "."
 lfs.chdir(src)
 
+local function doNvim()
+	os.execute("lua ./view.lua;")
+	os.execute("clear")
+	os.execute("prettier --write ../*json >/dev/null")
+	os.execute("nvim -O ../json/todo.json ../done.json")
+end
+
+local function doCantDone()
+	os.execute("lua ./view.lua;")
+	os.execute("clear")
+	os.execute("prettier --write ../*json >/dev/null")
+	os.execute("nvim -O ../json/todo.json ../cantdone.json5")
+end
+
 local function exit(func) --TODO: this function is getting a lil big
-	local handle =
-		io.popen("gum choose 'Nvim' 'Quit (Commit)' 'Viddy' 'Quit (Dry)' 'Change Time' 'Change Category' 'Edit Tasks'")
+	local handle = io.popen(
+		"gum choose 'Nvim' 'Quit (Commit)' 'Viddy' 'Quit (Dry)' 'Change Time' 'Change Category' 'Nvim(cantDo)' 'Edit Tasks'"
+	)
 	if handle then
 		local choice = handle:read("*a"):gsub("\n", "")
 		handle:close()
+		if choice == "Nvim(cantDo)" then
+			doCantDone()
+			func()
+		end
 		if choice == "Viddy" then
 			func()
 		end
 		if choice == "Nvim" then
-			os.execute("lua ./view.lua;")
-			os.execute("clear")
-			os.execute("prettier --write ../*json >/dev/null")
-			os.execute("nvim -O ../json/todo.json ../done.json")
+			doNvim()
 			exit(func)
 		end
 		if choice == "Quit (Commit)" then
@@ -103,6 +125,9 @@ end
 local function doTodo()
 	os.execute("viddy -n " .. viddytime .. ' "{ time lua ./view.lua ' .. category .. '; } 2>&1"')
 	os.execute("clear")
+	if quick then
+		doNvim()
+	end
 	exit(doTodo)
 end
 doTodo()
