@@ -1,5 +1,5 @@
 local funcs = require("src/funcs")
-
+-- TODO: Ical to tasks, and then this can be my calendar app
 local inttodate = funcs.inttodate
 local datetoint = funcs.datetoint
 local timedeltatostr = funcs.timedeltatostr
@@ -63,6 +63,10 @@ end
 -- ─── Task creation ────────────────────────────────────────────────────────────
 
 local function createTask(task, date, repeats, hashfunc)
+	local attributes = {}
+	for _, value in ipairs(task.attributes()) do
+		attributes[value] = true
+	end
 	return {
 		name = task.name(date, repeats),
 		date = datetoint(date),
@@ -72,7 +76,7 @@ local function createTask(task, date, repeats, hashfunc)
 		due = datetoint(task.duetime(date)),
 		type = task.category(date),
 		hash = tostring(hashfunc),
-		consec = task.consecutive(date),
+		attrib = attributes,
 		num = repeats,
 	}
 end
@@ -147,10 +151,10 @@ end
 local function getUnconsecutive(tasks)
 	local tablex = require("pl.tablex")
 	local conlist = tablex.filter(tasks, function(task)
-		return task.consec
+		return task.attrib.consecutive
 	end)
 	local unconlist = tablex.filter(tasks, function(task)
-		return not task.consec
+		return not task.attrib.consecutive
 	end)
 	for _, task1 in ipairs(conlist) do
 		if
@@ -164,8 +168,36 @@ local function getUnconsecutive(tasks)
 	return unconlist
 end
 
+local function getAccumalative(tasks)
+	local tablex = require("pl.tablex")
+	local conlist = tablex.filter(tasks, function(task)
+		return task.attrib.accumalative
+	end)
+	local unconlist = tablex.filter(tasks, function(task)
+		return not task.attrib.accumalative
+	end)
+	for _, task1 in ipairs(conlist) do
+		if
+			not tablex.find_if(tasks, function(task2)
+				return task1.num > task2.num and task1.hash == task2.hash
+			end)
+		then
+			local acc = 0
+			for _, task2 in ipairs(conlist) do
+				if task1.hash == task2.hash then
+					acc = acc + 1
+				end
+			end
+			task1.name = task1.name .. " (+" .. acc - 1 .. ")"
+			table.insert(unconlist, task1)
+		end
+	end
+	return unconlist
+end
+
 local function getToDo(date, tasks, done)
 	local result = getUnfinished(date, getAllUndone(getAllDue(date, tasks), done))
+	result = getAccumalative(result)
 	return getUnconsecutive(result)
 	-- return getCategory(getUnconsecutive(result), "tasks.test")
 	-- return getAllUndone(getUnfinished(date, getAllDue(date, tasks)), done)
@@ -254,4 +286,5 @@ return {
 	getDoneToday = getDoneToday,
 	getUnconsecutive = getUnconsecutive,
 	getCategory = getCategory,
+	getAccumalative = getAccumalative,
 }

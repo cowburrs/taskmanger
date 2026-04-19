@@ -117,7 +117,7 @@ local modules = filesToModules(luafiles)
 local modeltasks = modulesToTasks(modules)
 local tasks = controller.getTasks(modeltasks, date)
 local done = taskShorten(openfile("done.json")) -- TODO: I should use json5 instead for done, its much better, then i don't have to append the stupid end of list
-os.execute("fixjson cantdone.json5 > json/cantdone.json")
+os.execute("fixjson cantdone.json5 > json/cantdone.json") -- TODO: THIS TAKES 0.04 fucking seconds to run
 for _, value in ipairs(taskShorten(openfile("json/cantdone.json"))) do -- TODO: This is pretty hard coded icl
 	table.insert(done, value)
 end

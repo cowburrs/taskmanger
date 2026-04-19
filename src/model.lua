@@ -144,7 +144,7 @@ local function Task(opts)
 		finishdelta = opts.finishdelta or just(timedelta(-1)), -- how long after it should show
 		showdelta = opts.showdelta or just(timedelta(0)),
 		category = opts.category or just(""),
-		consecutive = opts.consecutive or just(false),
+		attributes = opts.attributes or just({}),
 		checkstart = opts.checkstart or just(dt(2000, 1, 1)),
 		checkend = opts.checkend or checkEndDefault(),
 		checkstep = opts.checkstep or just(DAY), -- time between each check, so like daily or hourly, minutely is possible. secondly not implementable though can be thought of as dt
@@ -243,7 +243,7 @@ local function worksheetTasks(bookname, start, delta, repeats, skiplist)
 		checkstart = just(start),
 		checkrepeats = justRepeats(repeats),
 		checkstep = just(delta),
-		consecutive = just(true),
+		attributes = just({ "accumalative" }),
 	}
 end
 
@@ -254,7 +254,7 @@ local function consecutiveTask(name, repeats)
 		end,
 		checkrepeats = justRepeats(repeats),
 		checkstep = just(0),
-		consecutive = just(true),
+		attributes = just({ "consecutive" }),
 	}
 end
 
