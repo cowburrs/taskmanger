@@ -207,7 +207,7 @@ end
 
 local function getToDo(date, tasks, done)
 	local result = getUnfinished(date, getAllUndone(getAllDue(date, tasks), done))
-	result = getAccumalative(result) -- TODO: This shouldnt be here. cause (+1 makes it not copy pastable)
+	-- result = getAccumalative(result) -- TODO: This shouldnt be here. cause (+1 makes it not copy pastable)
 	return getUnconsecutive(result)
 	-- return getCategory(getUnconsecutive(result), "tasks.test")
 	-- return getAllUndone(getUnfinished(date, getAllDue(date, tasks)), done)

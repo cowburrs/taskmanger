@@ -51,7 +51,8 @@ local function filesToTasks(files)
 	local tasks = {}
 	for _, value in ipairs(files) do
 		for _, task in ipairs(fileToTask(value)) do
-			task.category = model.just(value)
+			local filename = value:match("([^/\\]+)%.[^.]+$")
+			task.category = model.just(filename)
 			table.insert(tasks, task)
 		end
 	end
@@ -155,10 +156,6 @@ if arg[1] then
 	todo = controller.getCategory(todo, arg[1])
 end
 local shortened = tasksToReadables(todo, date)
-shortDictPrint(shortened)
-print()
-print("-| Done Today |-")
-doneTaskPrint(controller.getDoneToday(date, done), date)
 local todofile = toCopyDict(shortened, date)
 
 -- TODO: I should lock these behind arg so i dont have to fucking run these every time and use
@@ -167,3 +164,9 @@ writefile(cacherepo .. "json/todo.json", todofile) -- TODO: Writing does not wor
 writefile(cacherepo .. "json/tasks.json", tasks) -- TODO: i dont even need to write, i can pipe to nvim
 --TODO: writing files should be in main
 -- tf:write(json.encode(shortened))
+
+shortDictPrint(tasksToReadables(controller.sortByDue(controller.getAccumalative(todo)), date))
+-- shortDictPrint(tasksToReadables(todo, date))
+print()
+print("-| Done Today |-")
+doneTaskPrint(controller.getDoneToday(date, done), date)
