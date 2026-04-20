@@ -198,7 +198,9 @@ local function getAccumalative(tasks) -- TODO: this doesnt fucking work for addi
 					acc = acc + 1
 				end
 			end
-			task1.name = task1.name .. " (+" .. acc - 1 .. ")"
+			if acc > 1 then
+				task1.name = task1.name .. " (+" .. acc - 1 .. ")"
+			end
 			table.insert(unconlist, task1)
 		end
 	end
