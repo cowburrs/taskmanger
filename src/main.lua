@@ -72,7 +72,7 @@ local function exit(func) --TODO: this function is getting a lil big
 		end
 		if choice == "Nvim" then
 			doNvim()
-			exit(func)
+			func()
 		end
 		if choice == "Quit (Commit)" then
 			local originaldir = lfs.currentdir()
@@ -134,13 +134,15 @@ local function exit(func) --TODO: this function is getting a lil big
 				end
 			else
 				lfs.chdir(originaldir)
-				exit(func)
+				exit(func) -- TODO: make it run view.lua so that all jsons and stuff can be redone
 			end
 		end
 	end
 end
 local function doTodo()
 	os.execute("viddy -n " .. viddytime .. ' "{ time lua ./view.lua ' .. category .. '; } 2>&1"')
+	-- TODO: i could make view.lua or some other shitty lua that just prints the a function in view or main so that
+	-- we get real time smth idk i don't like not being able to pipe to viddy
 	os.execute("clear")
 	if quick then
 		doNvim()

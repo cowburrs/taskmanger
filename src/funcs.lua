@@ -78,11 +78,11 @@ local function datetoint(date, timed)
 end
 
 local function floorToDay(t)
-    local d = os.date("*t", t)
-    d.hour = 0
-    d.min = 0
-    d.sec = 0
-    return os.time(d)
+	local d = os.date("*t", t)
+	d.hour = 0
+	d.min = 0
+	d.sec = 0
+	return os.time(d)
 end
 
 local function inttodate(n)
@@ -93,6 +93,13 @@ local function inttodate(n)
 	local hour = tonumber(s:sub(9, 10))
 	local min = tonumber(s:sub(11, 12))
 	return os.time({ year = year, month = month, day = day, hour = hour, min = min, sec = 0 })
+end
+
+local function addDays(timestamp, days)
+	local t = os.date("*t", timestamp)
+	t.day = t.day + days
+	t.isdst = nil
+	return os.time(t)
 end
 
 local function timedeltatostr(td)
@@ -235,5 +242,6 @@ return {
 	spread = spread,
 	day = day,
 	getNumSkipTable = getNumSkipTable,
-	floorToDay = floorToDay
+	floorToDay = floorToDay,
+	addDays = addDays,
 }

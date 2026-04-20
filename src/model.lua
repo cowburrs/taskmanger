@@ -132,6 +132,12 @@ local function justRepeats(x)
 	return repeatsN
 end
 
+local function checkStepDay() -- dst and shit
+	return function(date, n)
+		return (funcs.addDays(date, 1) - date)
+	end
+end
+
 -- ─── Task ─────────────────────────────────────────────────────────────────────
 
 local function Task(opts)
@@ -147,7 +153,7 @@ local function Task(opts)
 		attributes = opts.attributes or just({}),
 		checkstart = opts.checkstart or just(dt(2000, 1, 1)),
 		checkend = opts.checkend or checkEndDefault(),
-		checkstep = opts.checkstep or just(DAY), -- time between each check, so like daily or hourly, minutely is possible. secondly not implementable though can be thought of as dt
+		checkstep = opts.checkstep or checkStepDay(), -- time between each check, so like daily or hourly, minutely is possible. secondly not implementable though can be thought of as dt
 		checkrepeats = opts.checkrepeats or justRepeats(1), -- total number of repeats before it stops, -1 is inf (or any negative number, it stops at 0)
 	}
 end
@@ -295,4 +301,5 @@ return {
 	weeklyTask = weeklyTask,
 	isWeekOfMonth = isWeekOfMonth,
 	consecutiveTask = consecutiveTask,
+	checkStepDay = checkStepDay,
 }
