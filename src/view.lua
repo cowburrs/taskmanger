@@ -147,8 +147,7 @@ local luafiles = dir.getallfiles(configrepo .. "tasks", "*.lua")
 local modeltasks = filesToTasks(luafiles)
 local tasks = controller.getTasks(modeltasks, date)
 local done = taskShorten(openfile(configrepo .. "done.json")) -- TODO: I should use json5 instead for done, its much better, then i don't have to append the stupid end of list
-os.execute("fixjson " .. configrepo .. "cantdone.json5 > " .. cacherepo .. "json/cantdone.json") -- TODO: THIS TAKES 0.04 fucking seconds to run
-for _, value in ipairs(taskShorten(openfile("json/cantdone.json"))) do -- TODO: This is pretty hard coded icl
+for _, value in ipairs(taskShorten(openfile(configrepo .. "cantdone.json"))) do -- TODO: This is pretty hard coded icl
 	table.insert(done, value)
 end
 local todo = controller.sortByDue(controller.getToDo(date, tasks, done))

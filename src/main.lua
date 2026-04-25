@@ -1,3 +1,4 @@
+-- TODO: add ical support
 -- os.execute: run command, just get exit code
 local function superWait()
 	local gumspins =
@@ -41,7 +42,7 @@ local function doNvim() -- TODO: make entire front end configurable, through lik
 	lfs.chdir(cacherepo)
 	os.execute("lua ./view.lua;")
 	os.execute("clear")
-	os.execute("prettier --config ".. originaldir .."/../.prettierrc --write ./*json >/dev/null")
+	os.execute("prettier --config " .. originaldir .. "/../.prettierrc --write ./*json >/dev/null")
 	os.execute("nvim -O json/todo.json " .. configrepo .. "done.json")
 	lfs.chdir(originaldir)
 end
@@ -125,8 +126,8 @@ local function exit(func) --TODO: this function is getting a lil big
 				os.execute("git add ./tasks/")
 				os.execute("git commit -m 'feat: changed ./tasks'")
 				os.execute("clear")
-				lfs.chdir(originaldir)
 				if run("Pushing...", "git push", "pulse") then
+					lfs.chdir(originaldir)
 					exit(func)
 				else
 					print("Push Failed")
