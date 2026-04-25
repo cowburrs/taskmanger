@@ -196,13 +196,14 @@ local function lectureTask(Subject, Letter, Week, WeekDay, Start, Repeats)
 	}
 end
 
-local function weeklyTask(name)
+local function weeklyTask(name, day)
+	day = day or 0
 	return {
 		name = just(name),
-		conditions = { isDayOfWeek(0) },
+		conditions = { isDayOfWeek(day) },
 		duetime = dueTime(timedelta(7)),
 		checkstart = function(date)
-			return funcs.floorToDay(date) - timedelta(7)
+			return funcs.floorToDay(date) - timedelta(7 - day) 
 		end,
 		checkrepeats = justRepeats(2),
 		finishdelta = just(timedelta(0)),
@@ -265,9 +266,6 @@ local function consecutiveTask(name, repeats)
 end
 
 -- ─── Tasks list ───────────────────────────────────────────────────────────────
-
--- TODO: I could use gum in my cli tool, like as in to like 'you want to change add to todo' or as in like a 'do you wish to gitshit'
--- Or i could make it that when you do exit, it checks if done has been changed, and auto git add commits that. that sounds smart
 
 return {
 	DAY = DAY,
