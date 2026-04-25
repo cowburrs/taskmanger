@@ -1,3 +1,4 @@
+-- TODO: I could maybe use reactjs
 -- TODO: add ical support
 -- os.execute: run command, just get exit code
 local function superWait()
