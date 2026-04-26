@@ -1,3 +1,4 @@
+-- TODO: lsp for the .config taskmanger, could use project specific nvim configuration like exrc vimrc or whatever, neodev too
 -- TODO: I could maybe use reactjs
 -- TODO: add ical support
 -- os.execute: run command, just get exit code

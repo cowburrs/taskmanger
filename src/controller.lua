@@ -40,10 +40,10 @@ local function sortByDue(tasks)
 	table.sort(sorted, function(a, b) -- TODO: Make this a definable function in .config
 		local ad = a.due
 		local bd = b.due
-		if ad == datetoint(epoch2000)  then
+		if ad == datetoint(epoch2000) then
 			ad = math.huge
 		end
-		if bd == datetoint(epoch2000)  then
+		if bd == datetoint(epoch2000) then
 			bd = math.huge
 		end
 		if ad == bd then
@@ -86,7 +86,7 @@ local function createTask(task, date, repeats, hashfunc)
 		due = datetoint(task.duetime(date)),
 		type = task.category(date),
 		hash = tostring(hashfunc),
-		attrib = attributes,
+		attrib = attributes, -- NOT A FUNCTION WHATA. i'm just kidding i don't really care
 		num = repeats,
 	}
 end
@@ -94,25 +94,27 @@ end
 local function getAllUndone(tasks, done)
 	done = done or {}
 	local donetasks = {}
-	for _, d in ipairs(done) do
+	for _, d in ipairs(done) do -- bullshit jutsu
 		donetasks[d.name] = donetasks[d.name] or {}
 		donetasks[d.name][d.date] = donetasks[d.name][d.date] or {}
-		table.insert(donetasks[d.name][d.date], d.done)
+		donetasks[d.name][d.date][d.done] = donetasks[d.name][d.date][d.done] or true
 	end
 
 	local undone = {}
 	for _, i in ipairs(tasks) do
 		if donetasks[i.name] and donetasks[i.name][i.date] then
 			local found = false
-			for _, value in ipairs(donetasks[i.name][i.date]) do
-				if i.finish >= 0 then
+			for value, _ in pairs(donetasks[i.name][i.date]) do
+				if i.finish >= 0 then -- only apply it if its not finished type hsit
 					if value >= funcs.inttodate(i.date) and value <= funcs.inttodate(i.due) + i.finish then
 						found = true
+						donetasks[i.name][i.date][value] = nil --  so that one done task doesnt tick off all other tasks, its sorted an opinionated decision i guess
 						break
 					end
 				else
 					if value >= funcs.inttodate(i.date) then
 						found = true
+						donetasks[i.name][i.date][value] = nil
 						break
 					end
 				end
@@ -138,6 +140,7 @@ local function getAllDue(date, tasks)
 	return due
 end
 
+-- this function basically means remove all that dont' matter, like weekly tasks are finished on day, so they dont show on the week after and stuff
 local function getUnfinished(date, tasks) -- this function for sure works btw i checked
 	local unfinished = {}
 	for _, value in ipairs(tasks) do
@@ -178,7 +181,7 @@ local function getUnconsecutive(tasks)
 	return unconlist
 end
 
-local function getAccumalative(tasks) -- TODO: this doesnt fucking work for adding a task cause it appends a stupid ass (+1), 
+local function getAccumalative(tasks) -- TODO: this doesnt fucking work for adding a task cause it appends a stupid ass (+1),
 	local tablex = require("pl.tablex")
 	local conlist = tablex.filter(tasks, function(task)
 		return task.attrib.accumalative
@@ -209,10 +212,7 @@ end
 
 local function getToDo(date, tasks, done)
 	local result = getUnfinished(date, getAllUndone(getAllDue(date, tasks), done))
-	-- result = getAccumalative(result) -- TODO: This shouldnt be here. cause (+1 makes it not copy pastable)
 	return getUnconsecutive(result)
-	-- return getCategory(getUnconsecutive(result), "tasks.test")
-	-- return getAllUndone(getUnfinished(date, getAllDue(date, tasks)), done)
 end
 
 local function getDoneToday(date, done)
