@@ -55,7 +55,7 @@ local function doCantDone()
 	os.execute("lua ./view.lua;")
 	os.execute("clear")
 	os.execute("prettier --config " .. originaldir .. "/../.prettierrc --write ./*json >/dev/null")
-	os.execute("nvim -O json/todo.json " .. configrepo .. "cantdone.json5")
+	os.execute("nvim -O json/todo.json " .. configrepo .. "cantdone.json")
 	lfs.chdir(originaldir)
 end
 
