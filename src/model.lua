@@ -203,9 +203,21 @@ local function weeklyTask(name, day)
 		conditions = { isDayOfWeek(day) },
 		duetime = dueTime(timedelta(7)),
 		checkstart = function(date)
-			return funcs.floorToDay(date) - timedelta(7 - day) 
+			return funcs.floorToDay(date) - timedelta(7 - day)
 		end,
 		checkrepeats = justRepeats(2),
+		finishdelta = just(timedelta(0)),
+	}
+end
+
+local function dailyTask(name)
+	return {
+		name = just(name),
+		duetime = dueTime(timedelta(1)),
+		checkstart = function(date)
+			return funcs.floorToDay(date)
+		end,
+		checkrepeats = justRepeats(4),
 		finishdelta = just(timedelta(0)),
 	}
 end
@@ -300,4 +312,5 @@ return {
 	isWeekOfMonth = isWeekOfMonth,
 	consecutiveTask = consecutiveTask,
 	checkStepDay = checkStepDay,
+	dailyTask = dailyTask,
 }
