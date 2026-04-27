@@ -137,16 +137,15 @@ local function toCopyDict(shortened, date)
 	end
 	return copyable
 end
-local cacherepo = (os.getenv("XDG_CACHE_HOME") or (os.getenv("HOME") .. "/.cache")) .. "/taskmangr/"
---TODO: i accidentally did taskmangr instead of taskmanger...
+local cacherepo = (os.getenv("XDG_CACHE_HOME") or (os.getenv("HOME") .. "/.cache")) .. "/taskmanger/"
 
 local date = os.time()
 local dir = require("pl.dir")
-local configrepo = (os.getenv("XDG_CONFIG_HOME") or (os.getenv("HOME") .. "/.config")) .. "/taskmangr/" -- TODO: Make this a flag to be able to change
+local configrepo = (os.getenv("XDG_CONFIG_HOME") or (os.getenv("HOME") .. "/.config")) .. "/taskmanger/" -- TODO: Make this a flag to be able to change
 local luafiles = dir.getallfiles(configrepo .. "tasks", "*.lua")
 local modeltasks = filesToTasks(luafiles)
 local tasks = controller.getTasks(modeltasks, date)
-local done = taskShorten(openfile(configrepo .. "done.json")) -- TODO: I should use json5 instead for done, its much better, then i don't have to append the stupid end of list
+local done = taskShorten(openfile(configrepo .. "done.json"))
 for _, value in ipairs(taskShorten(openfile(configrepo .. "cantdone.json"))) do -- TODO: This is pretty hard coded icl
 	table.insert(done, value)
 end

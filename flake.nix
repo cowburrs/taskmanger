@@ -15,17 +15,17 @@
       packages.${system}.default = pkgs.writeShellApplication {
         name = "todo";
 
-        runtimeInputs = [
-          (pkgs.lua.withPackages (
+        runtimeInputs = with pkgs; [
+          (lua.withPackages (
             ps: with ps; [
               dkjson
               luafilesystem
               penlight
             ]
           ))
-          pkgs.viddy
-          pkgs.gum
-          pkgs.neovim
+          viddy
+          gum
+          neovim
         ];
 
         text = ''

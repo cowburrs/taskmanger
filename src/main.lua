@@ -19,8 +19,8 @@ local lfs = require("lfs")
 local viddytime = 5
 local category = ""
 local quick = false
-local configrepo = (os.getenv("XDG_CONFIG_HOME") or (os.getenv("HOME") .. "/.config")) .. "/taskmangr/" -- TODO: changable config repo
-local cacherepo = (os.getenv("XDG_CACHE_HOME") or (os.getenv("HOME") .. "/.cache")) .. "/taskmangr/"
+local configrepo = (os.getenv("XDG_CONFIG_HOME") or (os.getenv("HOME") .. "/.config")) .. "/taskmanger/" -- TODO: changable config repo
+local cacherepo = (os.getenv("XDG_CACHE_HOME") or (os.getenv("HOME") .. "/.cache")) .. "/taskmanger/"
 for index, value in ipairs(arg) do
 	if value == "-t" then
 		viddytime = tonumber(arg[index + 1]) -- TODO: Wrap viddy in a xdg config home, so that I can point the config file somewhere or in my flake i wrap my entire lua script in a xdg config home pointer
@@ -47,6 +47,8 @@ local function doNvim() -- TODO: make entire front end configurable, through lik
 	os.execute("prettier --config " .. originaldir .. "/../.prettierrc --write ./*json >/dev/null")
 	os.execute("nvim -O json/todo.json " .. configrepo .. "done.json")
 	lfs.chdir(originaldir)
+	dofile("view.lua")
+	os.execute("clear")
 end
 
 local function doCantDone()
@@ -75,7 +77,7 @@ local function exit(func) --TODO: this function is getting a lil big
 		end
 		if choice == "Nvim" then
 			doNvim()
-			func()
+			exit(func)
 		end
 		if choice == "Quit (Commit)" then
 			local originaldir = lfs.currentdir()
