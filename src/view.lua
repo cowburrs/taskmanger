@@ -141,7 +141,7 @@ local cacherepo = (os.getenv("XDG_CACHE_HOME") or (os.getenv("HOME") .. "/.cache
 
 local date = os.time()
 local dir = require("pl.dir")
-local configrepo = (os.getenv("XDG_CONFIG_HOME") or (os.getenv("HOME") .. "/.config")) .. "/taskmanger/" -- TODO: Make this a flag to be able to change
+local configrepo = (os.getenv("XDG_CONFIG_HOME") or (os.getenv("HOME") .. "/.config")) .. "/taskmanger/" -- TODO: Make this a flag to be able to change, from main.lua cause this shouldnt be in view
 local luafiles = dir.getallfiles(configrepo .. "tasks", "*.lua")
 local modeltasks = filesToTasks(luafiles)
 local tasks = controller.getTasks(modeltasks, date)
@@ -158,6 +158,7 @@ local todofile = toCopyDict(shortened, date)
 
 -- TODO: I should lock these behind arg so i dont have to fucking run these every time and use
 -- All of my ssd utilization
+-- TODO: make it so that if i dont specify flags for cacherepo it will not write
 writefile(cacherepo .. "json/todo.json", todofile) -- TODO: Writing does not work, since immutability, need to define in .cache
 writefile(cacherepo .. "json/tasks.json", tasks) -- TODO: i dont even need to write, i can pipe to nvim
 --TODO: writing files should be in main

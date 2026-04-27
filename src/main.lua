@@ -59,6 +59,67 @@ local function doCantDone()
 	os.execute("prettier --config " .. originaldir .. "/../.prettierrc --write ./*json >/dev/null")
 	os.execute("nvim -O json/todo.json " .. configrepo .. "cantdone.json")
 	lfs.chdir(originaldir)
+	dofile("view.lua")
+	os.execute("clear")
+end
+local function doQuitCommit()
+	local originaldir = lfs.currentdir()
+	lfs.chdir(configrepo)
+	if not os.execute("git diff --quiet HEAD done.json") then
+		if os.execute("gum confirm 'Do you really wish to Commit?'") then
+			os.execute("git restore --staged :/")
+			os.execute("git add done.json")
+			os.execute('git commit -m "feat: changed done.json"')
+			os.execute("git push")
+			lfs.chdir(originaldir)
+			os.exit(0)
+		else
+			lfs.chdir(originaldir)
+		end
+	else
+		lfs.chdir(originaldir)
+		os.exit(0)
+	end
+end
+
+local function doChangeTime()
+	local time = io.popen("gum input --placeholder 'Enter interval'")
+	if time then
+		viddytime = time:read("*a"):gsub("\n", "")
+		time:close()
+	end
+end
+
+local function doChangeCategory()
+	local inpstring = io.popen("gum input --placeholder 'Enter Category'")
+	if inpstring then
+		category = inpstring:read("*a"):gsub("\n", "")
+		inpstring:close()
+	end
+end
+local function doEditTasks()
+	local originaldir = lfs.currentdir()
+	lfs.chdir(configrepo)
+	os.execute("nvim ./tasks/")
+	if
+		not os.execute("git diff --quiet HEAD ./tasks/")
+		and os.execute("gum confirm 'Do you wish to Commit and Push?'")
+	then
+		os.execute("git restore --staged :/")
+		os.execute("git add ./tasks/")
+		os.execute("git commit -m 'feat: changed ./tasks'")
+		os.execute("clear")
+		if run("Pushing...", "git push", "pulse") then
+			lfs.chdir(originaldir)
+		else
+			print("Push Failed")
+			os.exit(1)
+		end
+	else
+		lfs.chdir(originaldir)
+	end
+	dofile("view.lua")
+	os.execute("clear")
 end
 
 local function exit(func) --TODO: this function is getting a lil big
@@ -80,67 +141,23 @@ local function exit(func) --TODO: this function is getting a lil big
 			exit(func)
 		end
 		if choice == "Quit (Commit)" then
-			local originaldir = lfs.currentdir()
-			lfs.chdir(configrepo)
-			if not os.execute("git diff --quiet HEAD done.json") then
-				if os.execute("gum confirm 'Do you really wish to Commit?'") then
-					os.execute("git restore --staged :/")
-					os.execute("git add done.json")
-					os.execute('git commit -m "feat: changed done.json"')
-					os.execute("git push")
-					lfs.chdir(originaldir)
-					os.exit(0)
-				else
-					lfs.chdir(originaldir)
-					exit(func)
-				end
-			else
-				lfs.chdir(originaldir)
-				os.exit(0)
-			end
+			doQuitCommit()
+			exit(func)
 		end
 		if choice == "Quit (Dry)" then
 			os.exit(0)
 		end
 		if choice == "Change Time" then
-			local time = io.popen("gum input --placeholder 'Enter interval'")
-			if time then
-				viddytime = time:read("*a"):gsub("\n", "")
-				time:close()
-			end
+			doChangeTime()
 			func()
 		end
 		if choice == "Change Category" then
-			local inpstring = io.popen("gum input --placeholder 'Enter Category'")
-			if inpstring then
-				category = inpstring:read("*a"):gsub("\n", "")
-				inpstring:close()
-			end
+			doChangeCategory()
 			func()
 		end
 		if choice == "Edit Tasks" then
-			local originaldir = lfs.currentdir()
-			lfs.chdir(configrepo)
-			os.execute("nvim ./tasks/")
-			if
-				not os.execute("git diff --quiet HEAD ./tasks/")
-				and os.execute("gum confirm 'Do you wish to Commit and Push?'")
-			then
-				os.execute("git restore --staged :/")
-				os.execute("git add ./tasks/")
-				os.execute("git commit -m 'feat: changed ./tasks'")
-				os.execute("clear")
-				if run("Pushing...", "git push", "pulse") then
-					lfs.chdir(originaldir)
-					exit(func)
-				else
-					print("Push Failed")
-					os.exit(1)
-				end
-			else
-				lfs.chdir(originaldir)
-				exit(func) -- TODO: make it run view.lua so that all jsons and stuff can be redone
-			end
+			doEditTasks()
+			exit(func)
 		end
 	end
 end
