@@ -48,6 +48,7 @@ local function doNvim() -- TODO: make entire front end configurable, through lik
 	os.execute("nvim -O json/todo.json " .. configrepo .. "done.json")
 	lfs.chdir(originaldir)
 	dofile("view.lua")
+	lfs.chdir(originaldir) -- TODO: this is stupid as fuck
 	os.execute("clear")
 end
 
@@ -60,6 +61,7 @@ local function doCantDone()
 	os.execute("nvim -O json/todo.json " .. configrepo .. "cantdone.json")
 	lfs.chdir(originaldir)
 	dofile("view.lua")
+	lfs.chdir(originaldir)
 	os.execute("clear")
 end
 local function doQuitCommit()
@@ -119,6 +121,7 @@ local function doEditTasks()
 		lfs.chdir(originaldir)
 	end
 	dofile("view.lua")
+	lfs.chdir(originaldir) --TODO: yes this is still stupid
 	os.execute("clear")
 end
 
@@ -137,7 +140,9 @@ local function exit(func) --TODO: this function is getting a lil big
 			func()
 		end
 		if choice == "Nvim" then
+			print(lfs.currentdir())
 			doNvim()
+			print(lfs.currentdir())
 			exit(func)
 		end
 		if choice == "Quit (Commit)" then
