@@ -47,7 +47,7 @@ local function doNvim() -- TODO: make entire front end configurable, through lik
 	os.execute("prettier --config " .. originaldir .. "/../.prettierrc --write ./*json >/dev/null")
 	os.execute("nvim -O json/todo.json " .. configrepo .. "done.json")
 	lfs.chdir(originaldir)
-	dofile("view.lua")
+	dofile("view.lua") -- TODO: make this also do category and stuff, maybe i coul wrap th edofile view lua in a function so that i don't have to call it every time and i can define it once ykwim
 	lfs.chdir(originaldir) -- TODO: this is stupid as fuck
 	os.execute("clear")
 end
@@ -140,9 +140,7 @@ local function exit(func) --TODO: this function is getting a lil big
 			func()
 		end
 		if choice == "Nvim" then
-			print(lfs.currentdir())
 			doNvim()
-			print(lfs.currentdir())
 			exit(func)
 		end
 		if choice == "Quit (Commit)" then
