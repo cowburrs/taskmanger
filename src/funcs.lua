@@ -148,7 +148,7 @@ local function hour(date)
 end
 
 local function dayofweek(date)
-	return (os.date("*t", date).wday - 2)
+	return (os.date("*t", date).wday - 2) % 7
 end
 
 local function absweek(date)

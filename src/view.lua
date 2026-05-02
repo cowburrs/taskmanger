@@ -52,7 +52,9 @@ local function filesToTasks(files)
 	for _, value in ipairs(files) do
 		for _, task in ipairs(fileToTask(value)) do
 			local filename = value:match("([^/\\]+)%.[^.]+$")
-			task.category = model.just(filename)
+			if task.category() == "" then
+				task.category = model.just(filename)
+			end
 			table.insert(tasks, task)
 		end
 	end

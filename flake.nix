@@ -6,7 +6,10 @@
   };
 
   outputs =
-    { self, nixpkgs }:
+    {
+      self,
+      nixpkgs,
+    }:
     let
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
@@ -26,7 +29,7 @@
           viddy
           gum
           neovim
-			 prettier
+          prettier
         ];
 
         text = ''
@@ -43,8 +46,12 @@
         type = "app";
         program = "${self.packages.${system}.default}/bin/todo";
         meta = {
-          description = "Taskmanger";
-        }; # TODO: add a license and stuff
+			 homepage = "https://github.com/cowburrs/taskmanger";
+          description = "A declarative task manager with lua configuration";
+          license = nixpkgs.lib.licenses.mit;
+			 platforms = nixpkgs.lib.platforms.linux;
+			 mainProgram = "Taskmanger";
+        }; 
       };
     };
 }

@@ -202,18 +202,6 @@ local function oneTimeTask(Name, Start, Due)
 	}
 end
 
-local function lectureTask(Subject, Letter, Week, WeekDay, Start, Repeats)
-	return {
-		name = function(_, n)
-			return Subject:sub(1, 1):upper() .. Subject:sub(2) .. " Week " .. (n + Week) .. " Lec" .. Letter:upper()
-		end,
-		conditions = { isDayOfWeek(WeekDay), isNotTeachingBreak() },
-		duetime = dueTime(timedelta(3)),
-		checkstart = just(Start),
-		checkrepeats = justRepeats(Repeats),
-	}
-end
-
 local function weeklyTask(name, day)
 	day = day or 0
 	return {
@@ -224,6 +212,22 @@ local function weeklyTask(name, day)
 			return funcs.floorToDay(date) - timedelta(7 - day)
 		end,
 		checkrepeats = justRepeats(2),
+		finishdelta = just(timedelta(0)),
+	}
+end
+
+local function multiWeekTask(name, days)
+	days = days or {}
+	return {
+		name = just(name),
+		conditions = { isDayWeek(days) },
+		duetime = dueTime(timedelta(7)),
+		checkstart = function(date)
+			return funcs.floorToDay(date) - timedelta(7)
+		end,
+		checkrepeats = justRepeats(#days * 2),
+		attributes = just({ "accumalative" }),
+		-- showdelta = just(timedelta(100)),
 		finishdelta = just(timedelta(0)),
 	}
 end
@@ -252,6 +256,18 @@ local function dailyTask(name)
 		end,
 		checkrepeats = justRepeats(4),
 		finishdelta = just(timedelta(0)),
+	}
+end
+
+local function lectureTask(Subject, Letter, Week, WeekDay, Start, Repeats)
+	return {
+		name = function(_, n)
+			return Subject:sub(1, 1):upper() .. Subject:sub(2) .. " Week " .. (n + Week) .. " Lec" .. Letter:upper()
+		end,
+		conditions = { isDayOfWeek(WeekDay), isNotTeachingBreak() },
+		duetime = dueTime(timedelta(3)),
+		checkstart = just(Start),
+		checkrepeats = justRepeats(Repeats),
 	}
 end
 
@@ -350,4 +366,5 @@ return {
 	isDayOfYear = isDayOfYear,
 	checkStepYear = checkStepYear,
 	dueTimeYear = dueTimeYear,
+	multiWeekTask = multiWeekTask,
 }

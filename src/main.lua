@@ -1,3 +1,4 @@
+-- TODO: symlink the src directory to .local so i can get stubs not from the specific directory for this stuff
 -- TODO: lsp for the .config taskmanger, could use project specific nvim configuration like exrc vimrc or whatever, neodev too
 -- TODO: I could maybe use reactjs
 -- TODO: add ical support
