@@ -65,6 +65,12 @@ local function isDayOfWeek(day)
 	end
 end
 
+local function isDayOfYear(day)
+	return function(date)
+		return funcs.dayofyear(date) == day
+	end
+end
+
 local function isWeekOfMonth(week, tdelta)
 	tdelta = tdelta or 0
 	return function(date)
@@ -95,6 +101,12 @@ end
 local function dueTime(delta)
 	return function(x)
 		return x + delta
+	end
+end
+
+local function dueTimeYear()
+	return function(date)
+		return funcs.addYears(date, 1)
 	end
 end
 
@@ -130,6 +142,12 @@ local function justRepeats(x)
 		end
 	end
 	return repeatsN
+end
+
+local function checkStepYear() -- dst and shit
+	return function(date, n)
+		return (funcs.addYears(date, 1) - date)
+	end
 end
 
 local function checkStepDay() -- dst and shit
@@ -206,6 +224,21 @@ local function weeklyTask(name, day)
 			return funcs.floorToDay(date) - timedelta(7 - day)
 		end,
 		checkrepeats = justRepeats(2),
+		finishdelta = just(timedelta(0)),
+	}
+end
+
+local function yearlyTask(name, day)
+	day = day or 1
+	return {
+		name = just(name),
+		conditions = { isDayOfYear(day) },
+		duetime = dueTimeYear(),
+		checkstart = function(date)
+			return funcs.floorToYear(date)
+		end,
+		checkrepeats = justRepeats(2),
+		checkstep = checkStepYear(),
 		finishdelta = just(timedelta(0)),
 	}
 end
@@ -313,4 +346,8 @@ return {
 	consecutiveTask = consecutiveTask,
 	checkStepDay = checkStepDay,
 	dailyTask = dailyTask,
+	yearlyTask = yearlyTask,
+	isDayOfYear = isDayOfYear,
+	checkStepYear = checkStepYear,
+	dueTimeYear = dueTimeYear,
 }

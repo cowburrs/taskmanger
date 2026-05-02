@@ -26,6 +26,7 @@
           viddy
           gum
           neovim
+			 prettier
         ];
 
         text = ''

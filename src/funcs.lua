@@ -82,6 +82,18 @@ local function floorToDay(t)
 	d.hour = 0
 	d.min = 0
 	d.sec = 0
+	d.isdst = nil
+	return os.time(d)
+end
+
+local function floorToYear(t)
+	local d = os.date("*t", t)
+	d.month = 1
+	d.day = 1
+	d.hour = 0
+	d.min = 0
+	d.sec = 0
+	d.isdst = nil
 	return os.time(d)
 end
 
@@ -98,6 +110,13 @@ end
 local function addDays(timestamp, days)
 	local t = os.date("*t", timestamp)
 	t.day = t.day + days
+	t.isdst = nil
+	return os.time(t)
+end
+
+local function addYears(timestamp, years)
+	local t = os.date("*t", timestamp)
+	t.year = t.year + years
 	t.isdst = nil
 	return os.time(t)
 end
@@ -244,4 +263,6 @@ return {
 	getNumSkipTable = getNumSkipTable,
 	floorToDay = floorToDay,
 	addDays = addDays,
+	addYears = addYears,
+	floorToYear = floorToYear,
 }
