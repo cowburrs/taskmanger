@@ -22,6 +22,7 @@ local category = ""
 local quick = false
 local configrepo = (os.getenv("XDG_CONFIG_HOME") or (os.getenv("HOME") .. "/.config")) .. "/taskmanger/" -- TODO: changable config repo
 local cacherepo = (os.getenv("XDG_CACHE_HOME") or (os.getenv("HOME") .. "/.cache")) .. "/taskmanger/"
+local localrepo = (os.getenv("XDG_DATA_HOME") or (os.getenv("HOME") .. "/.local/share")) .. "/taskmanger/"
 for index, value in ipairs(arg) do
 	if value == "-t" then
 		viddytime = tonumber(arg[index + 1]) -- TODO: Wrap viddy in a xdg config home, so that I can point the config file somewhere or in my flake i wrap my entire lua script in a xdg config home pointer
@@ -103,6 +104,8 @@ end
 local function doEditTasks()
 	local originaldir = lfs.currentdir()
 	lfs.chdir(configrepo)
+	os.execute("mkdir -p " .. localrepo .. "")
+	os.execute("ln -sf " .. originaldir .. " ".. localrepo .. "")
 	os.execute("nvim ./tasks/")
 	if
 		not os.execute("git diff --quiet HEAD ./tasks/")
