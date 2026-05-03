@@ -86,6 +86,16 @@ local function floorToDay(t)
 	return os.time(d)
 end
 
+local function floorToMonth(t)
+	local d = os.date("*t", t)
+	d.day = 1
+	d.hour = 0
+	d.min = 0
+	d.sec = 0
+	d.isdst = nil
+	return os.time(d)
+end
+
 local function floorToYear(t)
 	local d = os.date("*t", t)
 	d.month = 1
@@ -110,6 +120,20 @@ end
 local function addDays(timestamp, days)
 	local t = os.date("*t", timestamp)
 	t.day = t.day + days
+	t.isdst = nil
+	return os.time(t)
+end
+
+local function addMonths(timestamp, months)
+	local t = os.date("*t", timestamp)
+	t.month = t.month + months
+	t.isdst = nil
+	return os.time(t)
+end
+
+local function addWeeks(timestamp, weeks)
+	local t = os.date("*t", timestamp)
+	t.day = t.day + weeks
 	t.isdst = nil
 	return os.time(t)
 end
@@ -265,4 +289,7 @@ return {
 	addDays = addDays,
 	addYears = addYears,
 	floorToYear = floorToYear,
+	addWeeks = addWeeks,
+	addMonths = addMonths,
+	floorToMonth = floorToMonth,
 }

@@ -78,6 +78,13 @@ local function isWeekOfMonth(week, tdelta)
 	end
 end
 
+local function isNthWeek(n, offset)
+	offset = offset or 0
+	return function(date)
+		return (funcs.absweek(date) + offset) % n == 0
+	end
+end
+
 -- ─── Core helpers ─────────────────────────────────────────────────────────────
 
 local function just(x) -- ITS A FUCKING POLYMORPHIC FUNCTION XDDDDDDDDDDDDDDDDDDDDDDD
@@ -107,6 +114,12 @@ end
 local function dueTimeYear()
 	return function(date)
 		return funcs.addYears(date, 1)
+	end
+end
+
+local function dueTimeMonths(months)
+	return function(date)
+		return funcs.addMonths(date, months)
 	end
 end
 
@@ -147,6 +160,18 @@ end
 local function checkStepYear() -- dst and shit
 	return function(date, n)
 		return (funcs.addYears(date, 1) - date)
+	end
+end
+
+local function checkStepWeek() -- dst and shit
+	return function(date, n)
+		return (funcs.addDays(date, 7) - date)
+	end
+end
+
+local function checkStepMonth() -- dst and shit
+	return function(date, n)
+		return (funcs.addMonths(date, 1) - date)
 	end
 end
 
@@ -212,6 +237,38 @@ local function weeklyTask(name, day)
 			return funcs.floorToDay(date) - timedelta(7 - day)
 		end,
 		checkrepeats = justRepeats(2),
+		finishdelta = just(timedelta(0)),
+	}
+end
+
+local function seasonalTask(name, offset)
+	offset = offset or 0
+	return {
+		name = just(name),
+		conditions = {
+			function(date)
+				return (funcs.month(date) + offset) % 3 == 0
+			end,
+		},
+		duetime = dueTimeMonths(3),
+		checkstart = function(date)
+			return funcs.addMonths(funcs.floorToMonth(date), -3)
+		end,
+		checkrepeats = justRepeats(2),
+		checkstep = checkStepMonth(),
+	}
+end
+
+local function nthWeekTask(name, n, offset)
+	return {
+		name = just(name),
+		conditions = { isNthWeek(n, offset) },
+		duetime = dueTime(timedelta(7 * n)),
+		checkstart = function(date)
+			return funcs.floorToDay(date) - timedelta(14 * n)
+		end,
+		checkrepeats = justRepeats(3),
+		checkstep = checkStepWeek(),
 		finishdelta = just(timedelta(0)),
 	}
 end
@@ -367,4 +424,10 @@ return {
 	checkStepYear = checkStepYear,
 	dueTimeYear = dueTimeYear,
 	multiWeekTask = multiWeekTask,
+	isNthMonth = isNthWeek,
+	nthWeekTask = nthWeekTask,
+	checkStepWeek = checkStepWeek,
+	seasonalTask = seasonalTask,
+	checkStepMonth = checkStepMonth,
+	dueTimeMonths = dueTimeMonths,
 }
