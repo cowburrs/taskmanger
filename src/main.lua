@@ -1,3 +1,4 @@
+-- TODO: logseq todo
 -- TODO: RSS FEED THIS BITCH
 -- TODO: lsp for the .config taskmanger, could use project specific nvim configuration like exrc vimrc or whatever, neodev too
 -- TODO: I could maybe use reactjs
