@@ -189,7 +189,7 @@ local function Task(opts)
 		name = opts.name,
 		conditions = opts.conditions or {},
 		description = opts.description or just(""),
-		duetime = opts.duetime or dueTimeDefault(), -- 0 means never due
+		duetime = opts.duetime or dueTimeDefault(), -- 0 means never due TODO: make it so that we can set due time to the next occurence.
 		finishdelta = opts.finishdelta or just(timedelta(-1)), -- how long after it should show
 		showdelta = opts.showdelta or just(timedelta(0)),
 		category = opts.category or just(""),

@@ -41,15 +41,22 @@ local src = debug.getinfo(1, "S").source:match("^@(.+)$")
 src = src and (src:match("^(.+)[/\\][^/\\]+$") or ".") or "."
 lfs.chdir(src)
 
+local function doView()
+	os.execute("{ lua ./view.lua " .. category .. "; } 2>&1")
+end
+local function doViddy()
+	os.execute("viddy -n " .. viddytime .. ' "{ time lua ./view.lua ' .. category .. '; } 2>&1"')
+end
+
 local function doNvim() -- TODO: make entire front end configurable, through like init.lua or smth
 	local originaldir = lfs.currentdir()
 	lfs.chdir(cacherepo)
-	os.execute("lua ./view.lua;")
+	doView()
 	os.execute("clear")
 	os.execute("prettier --config " .. originaldir .. "/../.prettierrc --write ./*json >/dev/null")
 	os.execute("nvim -O json/todo.json " .. configrepo .. "done.json")
 	lfs.chdir(originaldir)
-	dofile("view.lua") -- TODO: make this also do category and stuff, maybe i coul wrap th edofile view lua in a function so that i don't have to call it every time and i can define it once ykwim
+	doView()
 	lfs.chdir(originaldir) -- TODO: this is stupid as fuck
 	os.execute("clear")
 end
@@ -57,12 +64,12 @@ end
 local function doCantDone()
 	local originaldir = lfs.currentdir()
 	lfs.chdir(cacherepo)
-	os.execute("lua ./view.lua;")
+	doView()
 	os.execute("clear")
 	os.execute("prettier --config " .. originaldir .. "/../.prettierrc --write ./*json >/dev/null")
 	os.execute("nvim -O json/todo.json " .. configrepo .. "cantdone.json")
 	lfs.chdir(originaldir)
-	dofile("view.lua")
+	doView()
 	lfs.chdir(originaldir)
 	os.execute("clear")
 end
@@ -105,7 +112,7 @@ local function doEditTasks()
 	local originaldir = lfs.currentdir()
 	lfs.chdir(configrepo)
 	os.execute("mkdir -p " .. localrepo .. "")
-	os.execute("ln -sf " .. originaldir .. " ".. localrepo .. "")
+	os.execute("ln -sf " .. originaldir .. " " .. localrepo .. "")
 	os.execute("nvim ./tasks/")
 	if
 		not os.execute("git diff --quiet HEAD ./tasks/")
@@ -169,7 +176,7 @@ local function exit(func) --TODO: this function is getting a lil big
 	end
 end
 local function doTodo()
-	os.execute("viddy -n " .. viddytime .. ' "{ time lua ./view.lua ' .. category .. '; } 2>&1"')
+	doViddy()
 	-- TODO: i could make view.lua or some other shitty lua that just prints the a function in view or main so that
 	-- we get real time smth idk i don't like not being able to pipe to viddy
 	os.execute("clear")
