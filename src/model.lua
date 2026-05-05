@@ -265,9 +265,9 @@ local function nthWeekTask(name, n, offset)
 		conditions = { isNthWeek(n, offset) },
 		duetime = dueTime(timedelta(7 * n)),
 		checkstart = function(date)
-			return funcs.floorToDay(date) - timedelta(14 * n)
+			return funcs.floorToWeek(date) - timedelta(7 * n)
 		end,
-		checkrepeats = justRepeats(3),
+		checkrepeats = justRepeats(5),
 		checkstep = checkStepWeek(),
 		finishdelta = just(timedelta(0)),
 	}

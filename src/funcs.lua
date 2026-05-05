@@ -67,6 +67,12 @@ local function spread(t, into)
 end
 -- ─── Date helpers ─────────────────────────────────────────────────────────────
 
+
+local function absweek(date)
+	local epoch = os.time({ year = 1969, month = 12, day = 29, hour = 0, min = 0, sec = 0 })
+	return math.floor((date - epoch) / (7 * 86400))
+end
+
 local function dayofyear(date)
 	local start = os.time({ year = os.date("*t", date).year, month = 1, day = 1, hour = 0, min = 0, sec = 0 })
 	return math.floor((date - start) / 86400) + 1
@@ -84,6 +90,12 @@ local function floorToDay(t)
 	d.sec = 0
 	d.isdst = nil
 	return os.time(d)
+end
+
+local function floorToWeek(t)
+	local week = absweek(t)
+	local epoch = os.time({ year = 1969, month = 12, day = 29, hour = 0, min = 0, sec = 0 })
+	return epoch + week * (7 * 86400)
 end
 
 local function floorToMonth(t)
@@ -175,10 +187,6 @@ local function dayofweek(date)
 	return (os.date("*t", date).wday - 2) % 7
 end
 
-local function absweek(date)
-	local epoch = os.time({ year = 1969, month = 12, day = 29, hour = 0, min = 0, sec = 0 })
-	return math.floor((date - epoch) / (7 * 86400))
-end
 
 local function week(date)
 	-- ISO week number
@@ -292,4 +300,5 @@ return {
 	addWeeks = addWeeks,
 	addMonths = addMonths,
 	floorToMonth = floorToMonth,
+	floorToWeek = floorToWeek
 }
