@@ -1,3 +1,6 @@
+-- TODO: multiple categories one task.
+-- TODO: Showdelta should be able to be marked off, so you can mark things off early if show delta is inside
+-- TODO: Taskmanager -> gantt chart/ visualiser integration, so i could write stuff in here and export and then send to someone more readably.
 -- TODO: nix run ignore env to try and isolate dependancies
 -- TODO: logseq todo
 -- TODO: RSS FEED THIS BITCH
