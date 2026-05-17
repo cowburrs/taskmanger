@@ -1,3 +1,8 @@
+-- TODO: Make stubs like hyprland, instead of the shitty way i've done it
+-- TODO: postpone task feature
+-- TODO: luajit2
+-- TODO: port to teal
+-- TODO: instead of rebuilding every time, i could make a 'taskmanager-rebuild' like nix type of rebuild. this would remove the need for speed
 -- TODO: multiple categories one task.
 -- TODO: Showdelta should be able to be marked off, so you can mark things off early if show delta is inside
 -- TODO: Taskmanager -> gantt chart/ visualiser integration, so i could write stuff in here and export and then send to someone more readably.

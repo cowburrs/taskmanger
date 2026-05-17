@@ -280,9 +280,9 @@ local function multiWeekTask(name, days)
 		conditions = { isDayWeek(days) },
 		duetime = dueTime(timedelta(7)),
 		checkstart = function(date)
-			return funcs.floorToDay(date) - timedelta(7)
+			return funcs.floorToDay(date) - timedelta(14)
 		end,
-		checkrepeats = justRepeats(#days * 2),
+		checkrepeats = justRepeats(#days * 4),
 		attributes = just({ "accumalative" }),
 		-- showdelta = just(timedelta(100)),
 		finishdelta = just(timedelta(0)),
@@ -307,6 +307,19 @@ end
 local function dailyTask(name)
 	return {
 		name = just(name),
+		duetime = dueTime(timedelta(1)),
+		checkstart = function(date)
+			return funcs.floorToDay(date)
+		end,
+		checkrepeats = justRepeats(4),
+		finishdelta = just(timedelta(0)),
+	}
+end
+
+local function weekDayTask(name)
+	return {
+		name = just(name),
+		conditions = { isDayWeek({ 0, 1, 2, 3, 4 }) },
 		duetime = dueTime(timedelta(1)),
 		checkstart = function(date)
 			return funcs.floorToDay(date)
@@ -430,4 +443,5 @@ return {
 	seasonalTask = seasonalTask,
 	checkStepMonth = checkStepMonth,
 	dueTimeMonths = dueTimeMonths,
+	weekDayTask = weekDayTask,
 }
