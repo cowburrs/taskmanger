@@ -1,3 +1,4 @@
+-- TODO: argparse from penlight
 -- TODO: Make stubs like hyprland, instead of the shitty way i've done it
 -- TODO: postpone task feature
 -- TODO: luajit2
