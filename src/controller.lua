@@ -72,6 +72,8 @@ end
 
 -- ─── Task creation ────────────────────────────────────────────────────────────
 
+-- TODO: Make each thing return a set of all parameters, instead of like date only showing date and repeats.
+-- TODO: Create a new input, the input checks the task has been done, this is so that i can make a task appear 5 days after doing a task instead of just weekly.
 local function createTask(task, date, repeats, hashfunc)
 	local attributes = {}
 	for _, value in ipairs(task.attributes()) do
