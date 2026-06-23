@@ -396,6 +396,22 @@ local function consecutiveTask(name, repeats)
 	}
 end
 
+local function birthdayTask(name, day, month)
+	return {
+		name = function(_, n)
+			return name .. " birthday"
+		end,
+		duetime = dueTime(timedelta(1)),
+		checkrepeats = justRepeats(2),
+		checkstep = checkStepYear(),
+		showdelta = just(timedelta(14)),
+		finishdelta = just(timedelta(0)),
+		checkstart = function(date)
+			return dt(funcs.year(date), month, day)
+		end,
+	}
+end
+
 -- ─── Tasks list ───────────────────────────────────────────────────────────────
 
 return {
@@ -444,4 +460,5 @@ return {
 	checkStepMonth = checkStepMonth,
 	dueTimeMonths = dueTimeMonths,
 	weekDayTask = weekDayTask,
+	birthdayTask = birthdayTask,
 }
