@@ -398,7 +398,7 @@ end
 
 local function birthdayTask(name, day, month)
 	return {
-		name = function(_, n)
+		name = function(_)
 			return name .. " birthday"
 		end,
 		duetime = dueTime(timedelta(1)),
@@ -408,6 +408,21 @@ local function birthdayTask(name, day, month)
 		finishdelta = just(timedelta(0)),
 		checkstart = function(date)
 			return dt(funcs.year(date), month, day)
+		end,
+	}
+end
+
+local function eventTask(name, day, month, year)
+	return {
+		name = function(_)
+			return name
+		end,
+		duetime = dueTime(timedelta(1)),
+		checkrepeats = justRepeats(2),
+		checkstep = checkStepYear(),
+		showdelta = just(timedelta(14)),
+		checkstart = function(_)
+			return dt(year, month, day)
 		end,
 	}
 end
@@ -461,4 +476,5 @@ return {
 	dueTimeMonths = dueTimeMonths,
 	weekDayTask = weekDayTask,
 	birthdayTask = birthdayTask,
+	eventTask = eventTask,
 }
